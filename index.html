@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导航1024</title>
+    <link rel="icon" type="image/png" href="image/logo.png">
+    <link rel="apple-touch-icon" href="image/logo.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/m.css">
+    <script type="module">
+        import { shareUrl, exportData, importData, checkDeadLinks } from './js/utils.js';
+        window.utils = { shareUrl, exportData, importData, checkDeadLinks };
+    </script>
+</head>
+<body>
+    <!-- 主体容器 -->
+    <div class="app-container">
+        <!-- 移动端顶部导航栏 -->
+        <div class="mobile-nav">
+            <a href="#" class="mobile-nav-logo" onclick="goHome(event)">
+                <img src="image/logo.png" alt="Logo" id="mobileLogo">
+                <span class="mobile-nav-title" id="mobileTitle">导航1024</span>
+            </a>
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleDrawer()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        
+        <!-- 左侧分类抽屉菜单 -->
+        <div class="category-drawer" id="categoryDrawer">
+            <div class="drawer-header">
+                <h3>🧭 网站分类</h3>
+                <p>快速访问常用分类</p>
+            </div>
+            <div class="drawer-categories" id="drawerCategories">
+                <!-- JS 生成 -->
+            </div>
+        </div>
+        
+        <!-- 抽屉遮罩层 -->
+        <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+        
+        <!-- 侧边栏 -->
+        <nav class="sidebar">
+            <h2 onclick="goHome(event)">🧭 导航站</h2>
+            <ul class="category-list" id="categoryList">
+                <!-- JS 生成 -->
+            </ul>
+            
+            <!-- 最近访问 -->
+            <div class="recent-visits" id="recentVisits" style="display: none;">
+                <h3 style="padding: 15px 20px 10px; font-size: 0.85rem; color: rgba(255,255,255,0.6); border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">最近访问</h3>
+                <ul class="recent-list" id="recentList"></ul>
+            </div>
+        </nav>
+
+        <!-- 主内容区域 -->
+        <div class="content-wrapper">
+            <main class="main-content">
+                <!-- Banner 区域 -->
+                <div class="banner" id="banner">
+                    <div class="banner-content">
+                        <h1 class="banner-title" id="bannerTitle"></h1>
+                        <p class="banner-subtitle" id="bannerSubtitle"></p>
+                    </div>
+                    
+                    <!-- 时间显示 -->
+                    <div class="banner-time" id="bannerTime">
+                        <div class="time-clock" id="timeClock"></div>
+                        <div class="time-date" id="timeDate"></div>
+                    </div>
+                </div>
+                
+                <!-- 搜索框区域 -->
+                <div class="search-container">
+                    <!-- 搜索输入区域 -->
+                    <div class="search-input-wrapper">
+                        <select class="search-select" id="searchEngine">
+                            <option value="bing">必应</option>
+                            <option value="baidu">百度</option>
+                            <option value="google">谷歌</option>
+                            <option value="sogou">搜狗</option>
+                            <option value="bilibili">B站</option>
+                            <option value="weibo">微博</option>
+                            <option value="zhihu">知乎</option>
+                            <option value="github">GitHub</option>
+                        </select>
+                        <div class="search-input-box">
+                            <input type="text" class="search-input" id="searchInput" placeholder="输入关键词搜索... (支持标题和描述)" autocomplete="off">
+                            <button class="search-clear-btn" id="searchClearBtn" title="清空搜索" style="display: none;">×</button>
+                            <button class="theme-toggle-inline" id="themeToggle" title="切换主题">🌙</button>
+                        </div>
+                        <div class="search-buttons-mobile">
+                            <button class="search-btn-mobile" onclick="doSearch()" title="搜索">🔍</button>
+                            <button class="netdisk-btn-mobile" onclick="doNetdiskSearch(true)" title="网盘搜索">☁️</button>
+                        </div>
+                        <button class="search-btn" onclick="doSearch()">搜索</button>
+                        <button class="netdisk-search-btn" onclick="doNetdiskSearch(true)" title="网盘资源搜索（新标签页打开）">
+                            <span class="btn-text">网盘搜索</span>
+                            <span class="btn-badge">HOT</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 分类标签 -->
+                <div class="category-tabs" id="categoryTabs">
+                    <!-- JS 生成 -->
+                </div>
+
+                <!-- 卡片区域 -->
+                <div class="mobile-card-grid" id="cardGrid">
+                    <!-- JS 生成 -->
+                </div>
+            </main>
+
+            <!-- 底部信息 -->
+            <footer class="site-footer" id="siteFooter">
+                <div class="friend-links" id="friendLinks"></div>
+                <div class="copyright" id="copyrightText"></div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 编辑控制栏 -->
+    <div class="edit-controls" id="globalEditControls">
+        <div class="controls-title">⚙️ 编辑模式</div>
+        <div class="btn-group">
+            <button class="action-btn btn-add" onclick="showAddForm()">➕ 增加新网址</button>
+            <button class="action-btn btn-netdisk-config" onclick="showNetdiskConfig()">🔍 网盘搜索设置</button>
+            <button class="action-btn btn-check-links" onclick="checkDeadLinks()">🔍 检查死链</button>
+            <button class="action-btn btn-refresh-icons" onclick="refreshFavicons()">🔄 刷新图标</button>
+            <button class="action-btn btn-export" onclick="exportData()">📤 导出数据</button>
+            <button class="action-btn btn-import" onclick="document.getElementById('importFile').click()">📥 导入数据</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+            <button class="action-btn btn-save" onclick="finishEdit()">💾 保存修改</button>
+            <button class="action-btn btn-cancel" onclick="cancelEdit()">❌ 取消</button>
+        </div>
+    </div>
+
+    <!-- 添加网址表单 -->
+    <div class="add-form-overlay" id="addFormOverlay" onclick="hideAddForm(event)">
+        <div class="add-form-container" onclick="event.stopPropagation()">
+            <h3>添加新网址</h3>
+            <div class="form-group">
+                <label>网址：</label>
+                <input type="text" class="form-input" id="addUrlInput" placeholder="输入网址后按回车，如：https://www.example.com" autocomplete="off">
+                <div class="form-hint">按回车键自动获取网站信息</div>
+            </div>
+            <div id="addFormFields" style="display: none;">
+                <div class="form-group">
+                    <label>标题：</label>
+                    <input type="text" class="form-input" id="addTitleInput" placeholder="网站标题">
+                </div>
+                <div class="form-group">
+                    <label>描述：</label>
+                    <textarea class="form-textarea" id="addDescInput" placeholder="网站描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>分类：</label>
+                    <input type="text" class="form-input" id="addCategoryInput" placeholder="如：常用工具">
+                </div>
+                <div class="form-actions">
+                    <button class="action-btn btn-confirm" onclick="confirmAdd()">确认添加</button>
+                    <button class="action-btn btn-cancel-form" onclick="hideAddForm()">取消</button>
+                </div>
+            </div>
+            <div id="addFormLoading" style="display: none; text-align: center; padding: 20px;">
+                <div class="loading-spinner"></div>
+                <div>正在获取网站信息...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 网盘搜索配置表单 -->
+    <div class="add-form-overlay" id="netdiskConfigOverlay" onclick="hideNetdiskConfig(event)">
+        <div class="add-form-container" onclick="event.stopPropagation()">
+            <h3>🔍 网盘搜索设置</h3>
+            <div class="form-group">
+                <label>网盘搜索地址：</label>
+                <input type="text" class="form-input" id="netdiskSearchUrl" placeholder="例如：http://localhost:3000" autocomplete="off">
+                <div class="form-hint">输入你的网盘搜索项目地址（不含参数）</div>
+            </div>
+            <div class="form-group">
+                <label>参数名称：</label>
+                <input type="text" class="form-input" id="netdiskSearchParam" placeholder="例如：q 或 keyword" value="q">
+                <div class="form-hint">默认为 q，根据实际项目调整</div>
+            </div>
+            <div class="form-actions">
+                <button class="action-btn btn-confirm" onclick="saveNetdiskConfig()">💾 保存设置</button>
+                <button class="action-btn btn-cancel-form" onclick="hideNetdiskConfig()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移动端悬浮按钮 -->
+    <div class="mobile-float-btns">
+        <button class="float-btn float-theme" id="mobileThemeToggle" title="切换主题">🌙</button>
+        <button class="float-btn float-top" onclick="scrollToTop()" title="返回顶部">↑</button>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast">提示消息</div>
+
+    <!-- 快捷键提示 -->
+    <div class="shortcut-hint" id="shortcutHint">
+        <kbd>/</kbd> 搜索 &nbsp;|&nbsp; <kbd>Ctrl+Enter</kbd> 网盘搜索
+        <button class="scroll-top-btn" onclick="scrollToTop()" title="返回顶部">↑</button>
+    </div>
+
+    <script>
+        // --- 全局变量 ---
+        let navData = [];
+        let currentCategory = '全部';
+        let isEditMode = false;
+        let nextId = 1;
+        
+        // --- 配置（从后端API获取）---
+        let EDIT_TRIGGER = 'edit2024'; // 默认值，会被API覆盖
+        let SITE_TITLE = '导航1024';
+        let SITE_LOGO = 'image/logo.png';
+        let COPYRIGHT_TEXT = '© 2024 导航1024. All rights reserved.';
+        let FRIEND_LINKS = [];
+        let BANNER_IMAGE = '';
+        let BANNER_TITLE = '欢迎使用个人导航站';
+        let BANNER_SUBTITLE = '快速访问您常用的网站';
+        
+        // 网盘搜索配置
+        let NETDISK_SEARCH_URL = localStorage.getItem('netdiskSearchUrl') || 'http://localhost:3000';
+        let NETDISK_SEARCH_PARAM = localStorage.getItem('netdiskSearchParam') || 'q';
+        
+        // Favicon 缓存
+        const faviconCache = new Map(); 
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        // 最近访问
+        let recentVisits = JSON.parse(localStorage.getItem('recentVisits') || '[]');
+        let drawerExpandedParents = new Set();
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            
+            // 格式化时间 HH:MM:SS
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeStr = `${hours}:${minutes}:${seconds}`;
+            
+            // 格式化日期 YYYY年MM月DD日 星期X
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekDay = weekDays[now.getDay()];
+            const dateStr = `${year}年${month}月${day}日 ${weekDay}`;
+            
+            // 更新显示
+            const clockEl = document.getElementById('timeClock');
+            const dateEl = document.getElementById('timeDate');
+            if (clockEl) clockEl.textContent = timeStr;
+            if (dateEl) dateEl.textContent = dateStr;
+        }
+
+        // 获取网站 favicon
+        function getFavicon(url) {
+            try {
+                const domain = new URL(url).hostname;
+                
+                // 检查缓存
+                if (faviconCache.has(domain)) {
+                    return faviconCache.get(domain);
+                }
+                
+                // 使用多个备用API
+                const faviconUrl = `https://icon.horse/icon/${domain}`;
+                
+                // 存入缓存
+                faviconCache.set(domain, faviconUrl);
+                
+                return faviconUrl;
+            } catch (error) {
+                console.warn('获取 favicon 失败:', error);
+                return null;
+            }
+        }
+
+        // --- 名人名言功能 ---
+        let quotes = [];
+        
+        async function loadQuote() {
+            try {
+                // 加载名人名言 JSON 文件
+                const response = await fetch('data/名人名言.json');
+                if (!response.ok) throw new Error('无法加载名人名言');
+                
+                quotes = await response.json();
+                
+                // 随机显示一条名言到 placeholder
+                showRandomQuote();
+                
+                // 每 30 秒自动切换一次
+                setInterval(showRandomQuote, 30000);
+            } catch (error) {
+                // 如果加载失败，使用默认 placeholder
+                document.getElementById('searchInput').placeholder = '输入关键词搜索... (支持标题和描述)';
+            }
+        }
+        
+        function showRandomQuote() {
+            if (quotes.length === 0) return;
+                    
+            const searchInput = document.getElementById('searchInput');
+                    
+            // 随机选择一条名言
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            const quote = quotes[randomIndex];
+                    
+            // 更新 placeholder,格式:"名言"   -   名人(-前后各3个空格)
+            searchInput.placeholder = `"${quote.quote}"   -   ${quote.author}`;
+        }
+
+        // --- 初始化 ---
+        async function init() {
+            try {
+                // 加载配置
+                await loadConfig();
+                
+                // 初始化主题
+                applyTheme();
+                
+                // 启动时钟
+                updateTime();
+                setInterval(updateTime, 1000);
+                
+                // 加载必应壁纸
+                loadBingWallpaper();
+                
+                // 加载名人名言
+                loadQuote();
+                
+                // 加载导航数据
+                const response = await fetch('data/data.json?t=' + new Date().getTime());
+                if (!response.ok) throw new Error('网络错误');
+                navData = await response.json();
+                
+                // 验证数据格式
+                if (!Array.isArray(navData)) {
+                    navData = []; // 重置为空数组
+                    showToast('⚠️ 数据格式错误，已重置');
+                }
+                
+                // 计算下一个ID
+                if (navData.length > 0) {
+                    nextId = Math.max(...navData.map(item => item.id)) + 1;
+                }
+                
+                // 渲染移动端组件
+                renderDrawerCategories();
+                renderCategoryTabs();
+                applyMobileConfig();
+                
+                renderSidebar();
+                renderCards();
+                renderRecentVisits();
+                initSwipeGesture();
+                
+                // 确保搜索框可用
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.disabled = false;
+                    searchInput.readOnly = false;
+                }
+            } catch (error) {
+                showToast('无法加载数据，请检查 data.json');
+            }
+        }
+
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const response = await fetch('api/config.php');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.status === 'success' && result.config) {
+                        EDIT_TRIGGER = result.config.edit_trigger;
+                        SITE_TITLE = result.config.site_title;
+                        SITE_LOGO = result.config.site_logo;
+                        COPYRIGHT_TEXT = result.config.copyright;
+                        FRIEND_LINKS = result.config.friend_links || [];
+                        BANNER_IMAGE = result.config.banner_image || '';
+                        BANNER_TITLE = result.config.banner_title || '欢迎使用个人导航站';
+                        BANNER_SUBTITLE = result.config.banner_subtitle || '快速访问您常用的网站';
+                        
+                        // 应用配置到页面
+                        document.title = SITE_TITLE;
+                        applySiteConfig();
+                    }
+                }
+            } catch (error) {
+                // 配置加载失败，使用默认值
+            }
+        }
+
+        // 应用网站配置到页面
+        function applySiteConfig() {
+            // 更新标题
+            const titleElement = document.querySelector('.sidebar h2');
+            if (titleElement) {
+                if (SITE_LOGO) {
+                    titleElement.innerHTML = `<img src="${SITE_LOGO}" alt="Logo" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 8px;">${SITE_TITLE}`;
+                } else {
+                    titleElement.textContent = SITE_TITLE;
+                }
+            }
+            
+            // 应用移动端配置
+            applyMobileConfig();
+            
+            // 渲染 Banner
+            renderBanner();
+            
+            // 渲染底部信息
+            renderFooter();
+        }
+
+        // 渲染 Banner
+        function renderBanner() {
+            const bannerDiv = document.getElementById('banner');
+            const bannerTitle = document.getElementById('bannerTitle');
+            const bannerSubtitle = document.getElementById('bannerSubtitle');
+            
+            if (BANNER_IMAGE) {
+                // 有配置图片：使用配置的图片
+                bannerDiv.style.backgroundImage = `url('${BANNER_IMAGE}')`;
+                bannerDiv.classList.add('has-image');
+                bannerDiv.style.color = 'white';
+            } else {
+                // 无配置：使用渐变背景（必应壁纸会通过loadBingWallpaper加载）
+                bannerDiv.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                bannerDiv.classList.remove('has-image');
+                bannerDiv.style.color = 'white';
+            }
+            
+            bannerTitle.textContent = BANNER_TITLE;
+            bannerSubtitle.textContent = BANNER_SUBTITLE;
+        }
+
+        // 渲染底部信息
+        function renderFooter() {
+            // 渲染友情链接
+            const friendLinksDiv = document.getElementById('friendLinks');
+            if (FRIEND_LINKS && FRIEND_LINKS.length > 0) {
+                friendLinksDiv.innerHTML = `
+                    <span class="friend-links-title">友情链接：</span>
+                    <div class="friend-links-list">
+                        ${FRIEND_LINKS.map(link => `
+                            <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.name}</a>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                friendLinksDiv.innerHTML = '';
+            }
+            
+            // 渲染版权信息
+            const copyrightDiv = document.getElementById('copyrightText');
+            copyrightDiv.textContent = COPYRIGHT_TEXT;
+        }
+
+        // --- 移动端抽屉菜单 ---
+        function toggleDrawer() {
+            const drawer = document.getElementById('categoryDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const hamburger = document.getElementById('hamburgerBtn');
+            
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+        }
+        
+        function closeDrawer() {
+            const drawer = document.getElementById('categoryDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const hamburger = document.getElementById('hamburgerBtn');
+            
+            drawer.classList.remove('open');
+            overlay.classList.remove('show');
+            hamburger.classList.remove('active');
+        }
+        
+        // 渲染抽屉分类
+        function renderDrawerCategories() {
+            const drawer = document.getElementById('drawerCategories');
+            const allCategories = ['全部', ...new Set(navData.map(item => item.category))];
+            const tree = {};
+            const parentOrder = [];
+
+            function ensureParent(parent) {
+                if (!tree[parent]) {
+                    tree[parent] = { children: [] };
+                    parentOrder.push(parent);
+                }
+            }
+
+            allCategories.forEach(cat => {
+                if (cat.includes('-')) {
+                    const parts = cat.split('-');
+                    const parent = parts[0].trim();
+                    const child = parts.slice(1).join('-').trim();
+                    ensureParent(parent);
+                    tree[parent].children.push({ full: cat, name: child });
+                } else {
+                    ensureParent(cat);
+                }
+            });
+
+            let html = '';
+            parentOrder.forEach(parent => {
+                const children = tree[parent].children;
+                const hasChildren = children.length > 0;
+                const parentCount = parent === '全部'
+                    ? navData.length
+                    : navData.filter(item => item.category === parent || item.category.startsWith(parent + '-')).length;
+                const isParentActive = currentCategory === parent || children.some(c => c.full === currentCategory);
+                const isExpanded = hasChildren && (drawerExpandedParents.has(parent) || isParentActive);
+                const parentSafe = parent.replace(/'/g, "\\'");
+
+                if (hasChildren) {
+                    html += `
+                        <div class="drawer-category drawer-parent ${isParentActive ? 'active' : ''}" onclick="toggleDrawerParent('${parentSafe}')">
+                            <span class="drawer-category-name">${parent}</span>
+                            <span class="drawer-category-count">${parentCount}</span>
+                            <span class="drawer-arrow">${isExpanded ? '▾' : '▸'}</span>
+                        </div>
+                        <div class="drawer-sublist ${isExpanded ? 'open' : ''}">
+                            ${children.map(child => {
+                                const childSafe = child.full.replace(/'/g, "\\'");
+                                const isChildActive = currentCategory === child.full;
+                                return `
+                                    <div class="drawer-subcategory ${isChildActive ? 'active' : ''}" onclick="switchSubCategoryFromDrawer('${childSafe}')">
+                                        <span class="drawer-subcategory-dot">•</span>
+                                        <span class="drawer-subcategory-name">${child.name}</span>
+                                        <span class="drawer-subcategory-count">${navData.filter(item => item.category === child.full).length}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="drawer-category ${isParentActive ? 'active' : ''}" onclick="switchCategoryFromDrawer('${parentSafe}')">
+                            <span class="drawer-category-name">${parent}</span>
+                            <span class="drawer-category-count">${parentCount}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            drawer.innerHTML = html;
+        }
+
+        function toggleDrawerParent(parentCat) {
+            if (drawerExpandedParents.has(parentCat)) {
+                drawerExpandedParents.delete(parentCat);
+            } else {
+                drawerExpandedParents.add(parentCat);
+            }
+            switchCategory(parentCat);
+            renderDrawerCategories();
+        }
+
+        function switchSubCategoryFromDrawer(cat) {
+            switchCategory(cat);
+            closeDrawer();
+            renderDrawerCategories();
+            renderCategoryTabs();
+        }
+        
+        function getCategoryIcon(category) {
+            return '';
+        }
+        
+        function switchCategoryFromDrawer(cat) {
+            switchCategory(cat);
+            closeDrawer();
+            renderDrawerCategories();
+            renderCategoryTabs();
+        }
+        
+        // 渲染移动端分类标签
+        function renderCategoryTabs() {
+            const tabs = document.getElementById('categoryTabs');
+            const allCategories = ['全部', ...new Set(navData.map(item => item.category))];
+            
+            let html = '';
+            allCategories.forEach(cat => {
+                const isActive = currentCategory === cat;
+                html += `
+                    <button class="category-tab ${isActive ? 'active' : ''}" onclick="switchCategoryFromTab('${cat}')">
+                        ${cat}
+                    </button>
+                `;
+            });
+            
+            tabs.innerHTML = html;
+        }
+        
+        function switchCategoryFromTab(cat) {
+            switchCategory(cat);
+            renderCategoryTabs();
+            renderDrawerCategories();
+        }
+        
+        // 应用网站配置到移动端
+        function applyMobileConfig() {
+            const mobileLogo = document.getElementById('mobileLogo');
+            const mobileTitle = document.getElementById('mobileTitle');
+            
+            if (SITE_LOGO) {
+                mobileLogo.src = SITE_LOGO;
+            }
+            if (SITE_TITLE) {
+                mobileTitle.textContent = SITE_TITLE;
+            }
+        }
+        
+        // --- 渲染逻辑 ---
+        function renderSidebar() {
+            const allCategories = ['全部', ...new Set(navData.map(item => item.category))];
+            
+            // 解析分类结构
+            const categoryTree = {};
+            allCategories.forEach(cat => {
+                if (cat.includes('-')) {
+                    // 二级分类
+                    const parts = cat.split('-');
+                    const parent = parts[0].trim();
+                    const child = parts[1].trim();
+                    
+                    if (!categoryTree[parent]) {
+                        categoryTree[parent] = [];
+                    }
+                    categoryTree[parent].push({ name: cat, isChild: true });
+                } else {
+                    // 一级分类
+                    if (!categoryTree[cat]) {
+                        categoryTree[cat] = [];
+                    }
+                }
+            });
+            
+            // 生成HTML
+            const list = document.getElementById('categoryList');
+            let html = '';
+            
+            Object.keys(categoryTree).forEach(parentCat => {
+                const children = categoryTree[parentCat];
+                const hasChildren = children.some(c => c.isChild);
+                
+                if (hasChildren) {
+                    // 有子分类的一级分类
+                    const isActive = currentCategory === parentCat || children.some(c => c.name === currentCategory);
+                    html += `
+                        <li class="category-parent ${isActive ? 'active' : ''}" onclick="toggleParentCategory('${parentCat}')">
+                            <span class="category-name">${parentCat}</span>
+                            <span class="category-arrow">▼</span>
+                        </li>
+                        <ul class="subcategory-list" id="subcat-${parentCat}" style="display: ${isActive ? 'block' : 'none'};">
+                            ${children.filter(c => c.isChild).map(child => `
+                                <li class="subcategory-item ${currentCategory === child.name ? 'active' : ''}" 
+                                    onclick="switchCategory('${child.name}')">
+                                    ${child.name.split('-')[1].trim()}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                } else {
+                    // 普通一级分类
+                    html += `
+                        <li class="category-item ${currentCategory === parentCat ? 'active' : ''}" 
+                            onclick="switchCategory('${parentCat}')">
+                            ${parentCat}
+                        </li>
+                    `;
+                }
+            });
+            
+            list.innerHTML = html;
+        }
+        
+        // 切换一级分类的展开/折叠
+        function toggleParentCategory(parentCat) {
+            const subList = document.getElementById(`subcat-${parentCat}`);
+            if (subList) {
+                const isHidden = subList.style.display === 'none';
+                subList.style.display = isHidden ? 'block' : 'none';
+                
+                // 更新箭头方向
+                const arrow = event.target.closest('.category-parent').querySelector('.category-arrow');
+                if (arrow) {
+                    arrow.textContent = isHidden ? '▲' : '▼';
+                }
+                
+                // 如果展开,切换到该一级分类
+                if (isHidden) {
+                    switchCategory(parentCat);
+                }
+            }
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardGrid');
+            
+            if (currentCategory === '全部') {
+                // 按分类分组显示
+                const categories = [...new Set(navData.map(item => item.category))];
+                let html = '';
+                
+                categories.forEach(cat => {
+                    const filteredData = navData.filter(item => item.category === cat);
+                    if (filteredData.length > 0) {
+                        html += `<div class="category-section">
+                                    <h3 class="category-title">${cat}</h3>
+                                    <div class="card-row">
+                                        ${filteredData.map((item, index) => renderSingleCard(item, navData.indexOf(item))).join('')}
+                                    </div>
+                                 </div>`;
+                    }
+                });
+                grid.innerHTML = html;
+                initLazyIcons(); // 初始化懒加载
+                return;
+            }
+
+            let filteredData;
+            if (currentCategory.includes('-')) {
+                // 二级分类:只显示该二级分类
+                filteredData = navData.filter(item => item.category === currentCategory);
+            } else {
+                // 一级分类:显示该分类及其所有子分类
+                filteredData = navData.filter(item => {
+                    if (item.category === currentCategory) return true;
+                    // 检查是否是该一级分类的子分类
+                    if (item.category.includes('-')) {
+                        const parentCat = item.category.split('-')[0].trim();
+                        return parentCat === currentCategory;
+                    }
+                    return false;
+                });
+            }
+
+            if (filteredData.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+                return;
+            }
+
+            // 显示分类标题
+            const titleHtml = `<div class="category-section"><h3 class="category-title">${currentCategory}</h3></div>`;
+            
+            grid.innerHTML = `${titleHtml}
+                <div class="card-row">
+                    ${filteredData.map((item, index) => renderSingleCard(item, index)).join('')}
+                </div>`;
+            initLazyIcons(); // 初始化懒加载
+        }
+
+        // 抽取单个卡片渲染逻辑
+        function renderSingleCard(item, index) {
+            return `
+                <div class="card ${isEditMode ? 'editing' : ''} ${item.dead ? 'dead-link' : ''}" 
+                     draggable="${isEditMode}" 
+                     data-id="${item.id}"
+                     data-index="${index}"
+                     ondragstart="handleDragStart(event)" 
+                     ondragover="handleDragOver(event)" 
+                     ondrop="handleDrop(event)"
+                     ondragend="handleDragEnd(event)">
+                    ${isEditMode ? `
+                        <div style="position: absolute; top: 5px; right: 5px; cursor: move; font-size: 18px; opacity: 0.5;" title="拖拽排序">⋮⋮</div>
+                        ${item.dead ? '<div class="dead-badge">失效</div>' : ''}
+                        <input type="text" class="edit-input" value="${item.title}" data-key="title" data-id="${item.id}">
+                        <input type="text" class="edit-input" value="${item.url}" data-key="url" data-id="${item.id}">
+                        <input type="text" class="edit-input" value="${item.desc}" data-key="desc" data-id="${item.id}">
+                        <input type="text" class="edit-input" value="${item.category}" data-key="category" data-id="${item.id}">
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="action-btn btn-open" onclick="window.open('${item.url}', '_blank')">🔗 打开</button>
+                            <button class="action-btn btn-delete" onclick="deleteItem(${item.id})">❌ 删除</button>
+                        </div>
+                    ` : `
+                        <a href="${item.url}" target="_blank" onclick="recordVisit(${item.id})" style="text-decoration:none; color:inherit; display: flex; flex-direction: column; height: 100%;">
+                            <div class="card-header">
+                                <div class="card-icon" id="icon-${item.id}">
+                                    <img data-src="${getFavicon(item.url)}" 
+                                         alt="${item.title}" 
+                                         class="lazy-icon"
+                                         onerror="this.style.display='none'; const span = document.createElement('span'); span.textContent = '${(item.title || '?')[0].toUpperCase()}'; this.parentElement.appendChild(span);" 
+                                         onload="this.style.display='block';" 
+                                         style="width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                                <div class="card-title">${item.title}</div>
+                            </div>
+                            <div class="card-desc">${item.desc}</div>
+                        </a>
+                        ${item.dead ? '<div class="dead-badge">链接失效</div>' : ''}
+                    `}
+                </div>
+            `;
+        }
+
+        // --- 图标懒加载 ---
+        function initLazyIcons() {
+            if ('IntersectionObserver' in window) {
+                const iconObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.classList.remove('lazy-icon');
+                            observer.unobserve(img);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.lazy-icon').forEach(img => {
+                    iconObserver.observe(img);
+                });
+            } else {
+                // 回退方案
+                document.querySelectorAll('.lazy-icon').forEach(img => {
+                    img.src = img.dataset.src;
+                });
+            }
+        }
+
+        // --- 交互逻辑 ---
+        function switchCategory(cat) {
+            currentCategory = cat;
+            renderSidebar();
+            renderCards();
+            renderDrawerCategories();
+            renderCategoryTabs();
+        }
+
+        // 返回首页
+        function goHome(event) {
+            if (event) event.preventDefault();
+            switchCategory('全部');
+            closeDrawer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 网盘搜索功能
+        function doNetdiskSearch(openInNewTab = false) {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                showToast('请输入搜索关键词');
+                document.getElementById('searchInput').focus();
+                return;
+            }
+            
+            // 使用配置的网盘搜索地址和参数
+            const baseUrl = NETDISK_SEARCH_URL.replace(/\/$/, ''); // 移除末尾斜杠
+            const netdiskUrl = `${baseUrl}/?ai=${encodeURIComponent(keyword)}`;
+            
+            if (openInNewTab) {
+                // 点击按钮：新标签页打开
+                window.open(netdiskUrl, '_blank');
+            } else {
+                // Ctrl+Enter：当前页跳转（确保激活）
+                window.location.href = netdiskUrl;
+            }
+        }
+
+        // 监听搜索框输入，检测触发字符串
+        const searchInput = document.getElementById('searchInput');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // 显示/隐藏清空按钮
+                if (searchClearBtn) {
+                    searchClearBtn.style.display = value ? 'block' : 'none';
+                }
+                
+                if (value.trim() === EDIT_TRIGGER) {
+                    e.target.value = '';
+                    if (searchClearBtn) searchClearBtn.style.display = 'none';
+                    toggleEditMode();
+                }
+            });
+
+            // 清空按钮点击事件
+            if (searchClearBtn) {
+                searchClearBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    this.style.display = 'none';
+                    searchInput.focus();
+                    if (currentCategory === '搜索结果') {
+                        switchCategory('全部');
+                    }
+                });
+            }
+
+            // 监听回车搜索（使用 keydown 以支持 Ctrl 键检测）
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // 阻止默认行为
+                    const keyword = e.target.value.trim();
+                    if (keyword !== EDIT_TRIGGER) {
+                        // Ctrl+Enter 触发网盘搜索，普通 Enter 触发默认搜索
+                        if (e.ctrlKey || e.metaKey) { // 支持 Windows Ctrl 和 Mac Cmd
+                            doNetdiskSearch();
+                        } else {
+                            doSearch();
+                        }
+                    }
+                }
+            });
+        }
+
+        // 全局键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // / 键聚焦搜索框
+            if (e.key === '/' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
+
+        // --- 编辑模式 ---
+        async function toggleEditMode() {
+            if (isEditMode) {
+                // 退出编辑模式
+                isEditMode = false;
+                document.getElementById('globalEditControls').classList.remove('active');
+                renderCards();
+                return;
+            }
+            
+            // 进入编辑模式，需要验证密码
+            const password = prompt('请输入管理员密码:');
+            if (!password) return;
+            
+            try {
+                const response = await fetch('api/verify.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    isEditMode = true;
+                    document.getElementById('globalEditControls').classList.add('active');
+                    showToast('已进入编辑模式（可拖拽排序）');
+                    renderCards();
+                } else {
+                    showToast('密码错误');
+                }
+            } catch (error) {
+                console.error('验证失败:', error);
+                showToast('网络错误，请检查连接');
+            }
+        }
+
+        // --- 拖拽排序功能 ---
+        let draggedElement = null;
+        let draggedIndex = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target.closest('.card');
+            draggedIndex = parseInt(draggedElement.dataset.index);
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', draggedElement.innerHTML);
+            draggedElement.style.opacity = '0.4';
+            draggedElement.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const targetCard = e.target.closest('.card');
+            if (targetCard && targetCard !== draggedElement) {
+                targetCard.style.transform = 'scale(1.02)';
+                targetCard.style.boxShadow = '0 8px 16px rgba(74, 144, 226, 0.3)';
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const targetCard = e.target.closest('.card');
+            
+            if (targetCard && targetCard !== draggedElement) {
+                const targetIndex = parseInt(targetCard.dataset.index);
+                
+                const filteredData = currentCategory === '全部' 
+                    ? [...navData] 
+                    : navData.filter(item => item.category === currentCategory);
+                
+                const draggedItem = filteredData[draggedIndex];
+                const targetItem = filteredData[targetIndex];
+                
+                const draggedRealIndex = navData.findIndex(item => item.id === draggedItem.id);
+                const targetRealIndex = navData.findIndex(item => item.id === targetItem.id);
+                
+                [navData[draggedRealIndex], navData[targetRealIndex]] = [navData[targetRealIndex], navData[draggedRealIndex]];
+                
+                showToast('已调整顺序（需点击保存才生效）');
+                renderCards();
+            }
+        }
+
+        function handleDragEnd(e) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.opacity = '1';
+                card.style.transform = '';
+                card.style.boxShadow = '';
+                card.classList.remove('dragging');
+            });
+            draggedElement = null;
+            draggedIndex = null;
+        }
+
+        function deleteItem(id) {
+            if(confirm('确定删除这个网址吗？')) {
+                navData = navData.filter(item => item.id !== id);
+                renderCards();
+                renderSidebar();
+                showToast('已删除（需点击保存才生效）');
+            }
+        }
+
+        // --- 保存逻辑 ---
+        function finishEdit() {
+            // 1. 收集数据
+            const inputs = document.querySelectorAll('.edit-input');
+            inputs.forEach(input => {
+                const id = parseInt(input.getAttribute('data-id'));
+                const key = input.getAttribute('data-key');
+                const value = input.value;
+                const item = navData.find(i => i.id === id);
+                if (item) item[key] = value;
+            });
+
+            // 清理数据中的无效字符
+            const cleanData = navData.map(item => {
+                const cleaned = {};
+                for (let key in item) {
+                    if (typeof item[key] === 'string') {
+                        // 使用 encodeURIComponent/decodeURIComponent 清理无效字符
+                        try {
+                            cleaned[key] = decodeURIComponent(encodeURIComponent(item[key]));
+                        } catch (e) {
+                            // 如果失败,移除所有非ASCII和非中文的字符
+                            cleaned[key] = item[key].replace(/[^\x20-\x7E\u4e00-\u9fa5]/g, '');
+                        }
+                    } else {
+                        cleaned[key] = item[key];
+                    }
+                }
+                return cleaned;
+            });
+
+            // 2. 发送请求
+            fetch('api/edit.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: cleanData })
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    showToast('保存成功！');
+                    isEditMode = false;
+                    document.getElementById('globalEditControls').classList.remove('active');
+                    renderCards();
+                    renderSidebar();
+                } else {
+                    alert('保存失败：' + res.message);
+                }
+            })
+            .catch(error => {
+                alert('网络错误：' + error);
+            });
+        }
+
+        function cancelEdit() {
+            isEditMode = false;
+            document.getElementById('globalEditControls').classList.remove('active');
+            renderCards();
+        }
+
+        // --- 添加新网址功能 ---
+        function showAddForm() {
+            const overlay = document.getElementById('addFormOverlay');
+            overlay.classList.add('active');
+            document.getElementById('addUrlInput').value = '';
+            document.getElementById('addFormFields').style.display = 'none';
+            document.getElementById('addFormLoading').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('addUrlInput').focus();
+            }, 100);
+        }
+
+        function hideAddForm(event) {
+            if (event && event.target !== event.currentTarget) return;
+            const overlay = document.getElementById('addFormOverlay');
+            overlay.classList.remove('active');
+        }
+
+        // --- 网盘搜索配置功能 ---
+        function showNetdiskConfig() {
+            const overlay = document.getElementById('netdiskConfigOverlay');
+            overlay.classList.add('active');
+            document.getElementById('netdiskSearchUrl').value = NETDISK_SEARCH_URL;
+            document.getElementById('netdiskSearchParam').value = NETDISK_SEARCH_PARAM;
+            
+            setTimeout(() => {
+                document.getElementById('netdiskSearchUrl').focus();
+            }, 100);
+        }
+
+        function hideNetdiskConfig(event) {
+            if (event && event.target !== event.currentTarget) return;
+            const overlay = document.getElementById('netdiskConfigOverlay');
+            overlay.classList.remove('active');
+        }
+
+        function saveNetdiskConfig() {
+            const url = document.getElementById('netdiskSearchUrl').value.trim();
+            const param = document.getElementById('netdiskSearchParam').value.trim();
+            
+            if (!url) {
+                showToast('请输入网盘搜索地址');
+                return;
+            }
+            
+            // 保存到 localStorage
+            NETDISK_SEARCH_URL = url;
+            NETDISK_SEARCH_PARAM = param || 'q';
+            localStorage.setItem('netdiskSearchUrl', NETDISK_SEARCH_URL);
+            localStorage.setItem('netdiskSearchParam', NETDISK_SEARCH_PARAM);
+            
+            hideNetdiskConfig();
+            showToast('网盘搜索设置已保存！');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlInput = document.getElementById('addUrlInput');
+            if (urlInput) {
+                urlInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const url = this.value.trim();
+                        if (url) {
+                            fetchSiteInfo(url);
+                        }
+                    }
+                });
+            }
+        });
+
+        async function fetchSiteInfo(url) {
+            document.getElementById('addFormFields').style.display = 'none';
+            document.getElementById('addFormLoading').style.display = 'block';
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            try {
+                const response = await fetch('api/fetch_site_info.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    document.getElementById('addUrlInput').value = result.data.url;
+                    document.getElementById('addTitleInput').value = result.data.title;
+                    document.getElementById('addDescInput').value = result.data.desc;
+                    
+                    const defaultCategory = currentCategory === '全部' ? '常用工具' : currentCategory;
+                    document.getElementById('addCategoryInput').value = defaultCategory;
+                    
+                    document.getElementById('addFormLoading').style.display = 'none';
+                    document.getElementById('addFormFields').style.display = 'block';
+                    
+                    document.getElementById('addTitleInput').focus();
+                } else {
+                    showToast('获取失败：' + result.message);
+                    document.getElementById('addFormLoading').style.display = 'none';
+                    document.getElementById('addFormFields').style.display = 'block';
+                    document.getElementById('addUrlInput').value = url;
+                    document.getElementById('addTitleInput').value = '';
+                    document.getElementById('addDescInput').value = '';
+                    document.getElementById('addCategoryInput').value = currentCategory === '全部' ? '常用工具' : currentCategory;
+                }
+            } catch (error) {
+                console.error('获取网站信息失败:', error);
+                showToast('网络错误，请手动填写');
+                document.getElementById('addFormLoading').style.display = 'none';
+                document.getElementById('addFormFields').style.display = 'block';
+                document.getElementById('addUrlInput').value = url;
+                document.getElementById('addTitleInput').value = '';
+                document.getElementById('addDescInput').value = '';
+                document.getElementById('addCategoryInput').value = currentCategory === '全部' ? '常用工具' : currentCategory;
+            }
+        }
+
+        function confirmAdd() {
+            const url = document.getElementById('addUrlInput').value.trim();
+            const title = document.getElementById('addTitleInput').value.trim();
+            const desc = document.getElementById('addDescInput').value.trim();
+            const category = document.getElementById('addCategoryInput').value.trim();
+            
+            if (!url || !title) {
+                showToast('网址和标题不能为空');
+                return;
+            }
+            
+            let finalUrl = url;
+            if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+                finalUrl = 'https://' + finalUrl;
+            }
+            
+            const newItem = {
+                id: nextId++,
+                category: category || '其他',
+                title: title,
+                url: finalUrl,
+                desc: desc || '',
+                icon: title[0]
+            };
+            
+            navData.push(newItem);
+            
+            hideAddForm();
+            
+            renderCards();
+            renderSidebar();
+            
+            showToast('已添加新网址（需点击保存才生效）');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // --- 深色模式 ---
+        function applyTheme() {
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            const themeBtn = document.getElementById('themeToggle');
+            const mobileThemeBtn = document.getElementById('mobileThemeToggle');
+            const themeIcon = isDarkMode ? '☀️' : '🌙';
+            if (themeBtn) themeBtn.textContent = themeIcon;
+            if (mobileThemeBtn) mobileThemeBtn.textContent = themeIcon;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            
+            const handleThemeToggle = function() {
+                isDarkMode = !isDarkMode;
+                localStorage.setItem('darkMode', isDarkMode);
+                applyTheme();
+            };
+
+            if (themeToggle) themeToggle.addEventListener('click', handleThemeToggle);
+            if (mobileThemeToggle) mobileThemeToggle.addEventListener('click', handleThemeToggle);
+        });
+
+
+        // --- 必应壁纸 ---
+        async function loadBingWallpaper() {
+            try {
+                const today = new Date().toDateString();
+                const cached = localStorage.getItem('bing_wallpaper');
+                const cachedDate = localStorage.getItem('bing_wallpaper_date');
+                
+                if (cached && cachedDate === today) {
+                    updateBannerImage(cached);
+                    return;
+                }
+                
+                const response = await fetch('api/bing_wallpaper.php');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    localStorage.setItem('bing_wallpaper', data.url);
+                    localStorage.setItem('bing_wallpaper_date', today);
+                    updateBannerImage(data.url);
+                }
+            } catch (error) {
+                console.warn('壁纸加载失败:', error);
+            }
+        }
+
+        function updateBannerImage(url) {
+            const banner = document.getElementById('banner');
+            if (banner && url) {
+                banner.style.backgroundImage = `url('${url}')`;
+                banner.classList.add('has-image');
+            }
+        }
+
+        // --- 死链检测 ---
+        async function checkDeadLinks() {
+            if (window.utils && window.utils.checkDeadLinks) {
+                await window.utils.checkDeadLinks(navData, {
+                    renderCards: renderCards,
+                    showToast: showToast,
+                    onResult: showDeadLinksResult
+                });
+            }
+        }
+
+        // --- 显示死链检查结果 ---
+        function showDeadLinksResult(deadCount) {
+            if (deadCount === 0) {
+                showToast('✅ 检查完成！所有链接都正常');
+                return;
+            }
+            
+            // 获取所有失效链接
+            const deadLinks = navData.filter(item => item.dead);
+            
+            // 创建对话框
+            const overlay = document.createElement('div');
+            overlay.id = 'deadLinksDialog';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 5000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                background: white;
+                border-radius: 12px;
+                padding: 0;
+                max-width: 800px;
+                width: 90%;
+                max-height: 80vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            `;
+            
+            // 标题栏
+            const header = document.createElement('div');
+            header.style.cssText = `
+                padding: 20px;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            `;
+            header.innerHTML = `
+                <h3 style="margin: 0; color: #333;">🔍 发现 ${deadCount} 个失效链接</h3>
+                <button onclick="closeDeadLinksDialog()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+            `;
+            
+            // 工具栏
+            const toolbar = document.createElement('div');
+            toolbar.style.cssText = `
+                padding: 15px 20px;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                gap: 10px;
+                background: #f9f9f9;
+            `;
+            toolbar.innerHTML = `
+                <button id="selectAllBtn" onclick="toggleSelectAll()" style="padding: 8px 16px; background: #1890ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">全选</button>
+                <button onclick="deleteSelectedDeadLinks()" style="padding: 8px 16px; background: #ff4d4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">删除选中</button>
+                <button onclick="deleteAllDeadLinks()" style="padding: 8px 16px; background: #fa8c16; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">删除全部</button>
+                <span style="flex: 1;"></span>
+                <button onclick="closeDeadLinksDialog()" style="padding: 8px 16px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">关闭</button>
+            `;
+            
+            // 列表区域
+            const listContainer = document.createElement('div');
+            listContainer.id = 'deadLinksList';
+            listContainer.style.cssText = `
+                flex: 1;
+                overflow-y: auto;
+                padding: 10px;
+            `;
+            
+            // 生成列表项
+            deadLinks.forEach((item, index) => {
+                const listItem = document.createElement('div');
+                listItem.style.cssText = `
+                    padding: 12px;
+                    margin-bottom: 8px;
+                    background: #fff;
+                    border: 1px solid #ffe58f;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                `;
+                listItem.innerHTML = `
+                    <input type="checkbox" class="dead-link-checkbox" data-id="${item.id}" style="width: 18px; height: 18px; cursor: pointer;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: bold; color: #333;">${item.title}</div>
+                    </div>
+                    <button onclick="testDeadLink('${item.url}')" style="padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">测试</button>
+                    <button onclick="deleteSingleDeadLink(${item.id})" style="padding: 6px 12px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">删除</button>
+                `;
+                listContainer.appendChild(listItem);
+            });
+            
+            dialog.appendChild(header);
+            dialog.appendChild(toolbar);
+            dialog.appendChild(listContainer);
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+        }
+        
+        // 关闭对话框
+        function closeDeadLinksDialog() {
+            const overlay = document.getElementById('deadLinksDialog');
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        }
+        
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.dead-link-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            
+            const btn = document.getElementById('selectAllBtn');
+            btn.textContent = allChecked ? '全选' : '取消全选';
+        }
+        
+        // 测试单个链接
+        function testDeadLink(url) {
+            window.open(url, '_blank');
+        }
+        
+        // 删除单个失效链接
+        function deleteSingleDeadLink(id) {
+            if (confirm('确定删除这个网址吗？')) {
+                navData = navData.filter(item => item.id !== id);
+                renderCards();
+                renderSidebar();
+                
+                // 从列表中移除
+                const checkbox = document.querySelector(`.dead-link-checkbox[data-id="${id}"]`);
+                if (checkbox) {
+                    const listItem = checkbox.closest('div[style*="padding: 12px"]');
+                    if (listItem) listItem.remove();
+                }
+                
+                showToast('已删除');
+            }
+        }
+        
+        // 删除选中的失效链接
+        function deleteSelectedDeadLinks() {
+            const checkboxes = document.querySelectorAll('.dead-link-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showToast('请先选择要删除的链接');
+                return;
+            }
+            
+            if (!confirm(`确定删除选中的 ${checkboxes.length} 个网址吗？`)) return;
+            
+            const idsToDelete = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+            navData = navData.filter(item => !idsToDelete.includes(item.id));
+            renderCards();
+            renderSidebar();
+            
+            // 从列表中移除
+            checkboxes.forEach(cb => {
+                const listItem = cb.closest('div[style*="padding: 12px"]');
+                if (listItem) listItem.remove();
+            });
+            
+            showToast(`已删除 ${idsToDelete.length} 个网址`);
+        }
+        
+        // 删除所有失效链接
+        function deleteAllDeadLinks() {
+            const deadLinks = navData.filter(item => item.dead);
+            if (deadLinks.length === 0) {
+                showToast('没有失效链接');
+                return;
+            }
+            
+            if (!confirm(`确定删除所有 ${deadLinks.length} 个失效链接吗？`)) return;
+            
+            navData = navData.filter(item => !item.dead);
+            renderCards();
+            renderSidebar();
+            
+            closeDeadLinksDialog();
+            showToast(`已删除 ${deadLinks.length} 个失效链接`);
+        }
+
+        // --- 分享功能 ---
+        function shareUrl(title, url) {
+            if (window.utils && window.utils.shareUrl) {
+                window.utils.shareUrl(title, url, showToast);
+            }
+        }
+
+        // --- 全文搜索 ---
+        function doSearch() {
+            const engine = document.getElementById('searchEngine').value;
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) return;
+            
+            // 先尝试站内搜索
+            const localResults = navData.filter(item => 
+                item.title.toLowerCase().includes(keyword.toLowerCase()) ||
+                item.desc.toLowerCase().includes(keyword.toLowerCase()) ||
+                item.url.toLowerCase().includes(keyword.toLowerCase())
+            );
+            
+            if (localResults.length > 0) {
+                // 显示搜索结果
+                showSearchResults(localResults, keyword);
+                return;
+            }
+            
+            // 如果没有本地结果,使用外部搜索引擎
+            let url = '';
+            if(engine === 'baidu') url = `https://www.baidu.com/s?wd=${encodeURIComponent(keyword)}`;
+            if(engine === 'google') url = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+            if(engine === 'bing') url = `https://www.bing.com/search?q=${encodeURIComponent(keyword)}`;
+            if(engine === 'sogou') url = `https://www.sogou.com/web?query=${encodeURIComponent(keyword)}`;
+            if(engine === 'github') url = `https://github.com/search?q=${encodeURIComponent(keyword)}&type=repositories`;
+            if(engine === 'bilibili') url = `https://search.bilibili.com/all?keyword=${encodeURIComponent(keyword)}`;
+            if(engine === 'weibo') url = `https://s.weibo.com/weibo/${encodeURIComponent(keyword)}`;
+            if(engine === 'zhihu') url = `https://www.zhihu.com/search?q=${encodeURIComponent(keyword)}&type=content`;
+            window.open(url, '_blank');
+        }
+
+        function showSearchResults(results, keyword) {
+            const grid = document.getElementById('cardGrid');
+            currentCategory = '搜索结果';
+            
+            grid.innerHTML = results.map((item, index) => `
+                <div class="card" data-id="${item.id}" data-index="${index}">
+                    <a href="${item.url}" target="_blank" style="text-decoration:none; color:inherit;">
+                        <div class="card-header">
+                            <div class="card-icon" id="icon-search-${item.id}">
+                                <img data-src="${getFavicon(item.url)}" 
+                                     alt="${item.title}" 
+                                     class="lazy-icon"
+                                     onerror="this.style.display='none'; const span = document.createElement('span'); span.textContent = '${(item.title || '?')[0].toUpperCase()}'; this.parentElement.appendChild(span);" 
+                                     onload="this.style.display='block';" 
+                                     style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                            <div class="card-title">${highlightText(item.title, keyword)}</div>
+                        </div>
+                        <div class="card-desc">${highlightText(item.desc, keyword)}</div>
+                    </a>
+                </div>
+            `).join('');
+            initLazyIcons();
+            
+            // 更新侧边栏选中状态
+            document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
+            showToast(`找到 ${results.length} 个相关结果`);
+        }
+
+        function highlightText(text, keyword) {
+            if (!keyword) return text;
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<mark>$1</mark>');
+        }
+
+        // --- 移动端滑动手势 ---
+        function initSwipeGesture() {
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const minSwipeDistance = 50;
+            
+            document.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+            
+            document.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+            
+            function handleSwipe() {
+                const distance = touchEndX - touchStartX;
+                if (Math.abs(distance) < minSwipeDistance) return;
+                
+                const categories = ['全部', ...new Set(navData.map(item => item.category))];
+                const currentIndex = categories.indexOf(currentCategory);
+                
+                if (distance > 0 && currentIndex > 0) {
+                    // 右滑 - 上一个分类
+                    switchCategory(categories[currentIndex - 1]);
+                } else if (distance < 0 && currentIndex < categories.length - 1) {
+                    // 左滑 - 下一个分类
+                    switchCategory(categories[currentIndex + 1]);
+                }
+            }
+        }
+
+        // --- 刷新图标 ---
+        function refreshFavicons() {
+            faviconCache.clear();
+            renderCards();
+            showToast('图标缓存已清除，页面将重新加载图标');
+        }
+
+        // --- 返回顶部 ---
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // --- 导出数据 ---
+        function exportData() {
+            if (window.utils && window.utils.exportData) {
+                window.utils.exportData(navData, showToast);
+            }
+        }
+
+        // --- 导入数据 ---
+        function importData(event) {
+            if (window.utils && window.utils.importData) {
+                window.utils.importData(event, {
+                    showToast: showToast,
+                    onSuccess: function(validatedData) {
+                        navData = validatedData;
+                        nextId = Math.max(...navData.map(item => item.id)) + 1;
+                        currentCategory = '全部';
+                        renderSidebar();
+                        renderCards();
+                        renderRecentVisits();
+                        showToast('✅ 数据导入成功，请点击“💾 保存修改”按钮保存到服务器');
+                    }
+                });
+            }
+        }
+
+        // --- 设置浏览器主页 ---
+        function setAsHomepage() {
+            const url = window.location.href;
+                    
+            // 尝试 IE 浏览器的方法(旧版)
+            if (document.all) {
+                try {
+                    document.body.style.behavior = 'url(#default#homepage)';
+                    document.body.setHomePage(url);
+                    showToast('✅ 已设置为浏览器主页');
+                    return;
+                } catch (e) {
+                    // 如果失败,继续显示说明
+                }
+            }
+                    
+            // 现代浏览器:使用 confirm 确认框
+            const confirmed = confirm(
+                `🏠 设置为浏览器主页\n\n` +
+                `由于浏览器安全限制,需要您手动确认:\n\n` +
+                `点击"确定"后,将自动复制网址到剪贴板,\n` +
+                `请按照提示完成设置。\n\n` +
+                `当前网址:\n${url}`
+            );
+                    
+            if (confirmed) {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(url).then(() => {
+                    showHomepageInstructions(url);
+                }).catch(() => {
+                    // 如果复制失败,直接显示说明
+                    showHomepageInstructions(url);
+                });
+            }
+        }
+                
+        function showHomepageInstructions(url) {
+            const message = `📌 请按以下步骤设置主页:\n\n` +
+                           `1️⃣ 网址已复制到剪贴板\n\n` +
+                           `2️⃣ 打开浏览器设置\n\n` +
+                           `3️⃣ 找到"启动时"或"主页"设置\n\n` +
+                           `4️⃣ 粘贴网址并保存\n\n` +
+                           `💡 Chrome/Edge: 设置 > 启动时 > 打开特定页面\n` +
+                           `💡 Firefox: 设置 > 主页 > 自定义网址`;
+                    
+            alert(message);
+        }
+
+        // --- 记录访问 ---
+        function recordVisit(id) {
+            // 更新最近访问
+            const now = Date.now();
+            recentVisits = recentVisits.filter(v => v.id !== id); // 移除旧记录
+            recentVisits.unshift({ id, time: now }); // 添加到开头
+            recentVisits = recentVisits.slice(0, 9); // 只保留最近9个
+            localStorage.setItem('recentVisits', JSON.stringify(recentVisits));
+            
+            // 更新显示
+            renderRecentVisits();
+        }
+
+        // --- 渲染最近访问 ---
+        function renderRecentVisits() {
+            const container = document.getElementById('recentVisits');
+            const list = document.getElementById('recentList');
+            
+            if (recentVisits.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            list.innerHTML = recentVisits.map(visit => {
+                const item = navData.find(i => i.id === visit.id);
+                if (!item) return '';
+                
+                return `
+                    <li class="recent-item" onclick="recordVisit(${item.id}); window.open('${item.url}', '_blank');" title="${item.title}">
+                        <div class="recent-icon">
+                            <img src="${getFavicon(item.url)}" 
+                                 alt="${item.title}"
+                                 onerror="this.style.display='none'; const span = document.createElement('span'); span.textContent = '${(item.title || '?')[0].toUpperCase()}'; this.parentElement.appendChild(span);" 
+                                 onload="this.style.display='block';">
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>

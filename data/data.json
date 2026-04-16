@@ -1,0 +1,42 @@
+[
+    {
+        "id": 7,
+        "category": "常用工具",
+        "title": "微信文件传输助手网页版",
+        "url": "https:\/\/filehelper.weixin.qq.com\/",
+        "desc": "微信文件传输助手网页版",
+        "icon": "微"
+    },
+    {
+        "id": 3,
+        "category": "官方站点",
+        "title": "Bilibili",
+        "url": "https:\/\/www.bilibili.com",
+        "desc": "哔哩哔哩弹幕网",
+        "icon": "B"
+    },
+    {
+        "id": 9,
+        "category": "在线工具",
+        "title": "在线PS",
+        "url": "https:\/\/www.photopea.com\/",
+        "desc": "Photopea Online Photo Editor lets you edit photos, apply effects, filters, add text, crop or resize pictures. Do Online Photo Editing in your browser for free!",
+        "icon": "在"
+    },
+    {
+        "id": 8,
+        "category": "常用工具",
+        "title": "今日热点",
+        "url": "https:\/\/60s.lylme.com\/",
+        "desc": "每天120秒看世界",
+        "icon": "今"
+    },
+    {
+        "id": 5,
+        "category": "资源搜索",
+        "title": "汉堡网盘资源搜索",
+        "url": "https:\/\/vip.aliso.vip",
+        "desc": "网盘搜索，汇集多家网盘，搜索百万资源，所有资源仅供学习使用，不支持商业用途。",
+        "icon": "汉"
+    }
+]
