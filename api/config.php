@@ -16,7 +16,8 @@ echo json_encode([
         'friend_links' => FRIEND_LINKS,
         'banner_image' => BANNER_IMAGE,
         'banner_title' => BANNER_TITLE,
-        'banner_subtitle' => BANNER_SUBTITLE
+        'banner_subtitle' => BANNER_SUBTITLE,
+        'show_recent_visits' => SHOW_RECENT_VISITS
     ]
 ]);
 ?>

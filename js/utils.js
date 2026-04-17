@@ -73,7 +73,7 @@ export function importData(event, callback) {
 
 // --- 死链检测 ---
 export async function checkDeadLinks(navData, options) {
-    const { renderCards, showToast, onResult } = options;
+    const { showToast, onResult } = options;
     if (!confirm('开始检查所有链接是否可访问？这可能需要一些时间。')) return;
     
     const progressOverlay = document.createElement('div');
@@ -94,7 +94,7 @@ export async function checkDeadLinks(navData, options) {
     
     try {
         const total = navData.length;
-        let deadCount = 0;
+        let deadLinks = [];
         let checked = 0;
         
         const checkTasks = navData.map(item => {
@@ -112,8 +112,9 @@ export async function checkDeadLinks(navData, options) {
                     if (response.ok) {
                         const result = await response.json();
                         if (result.status === 'success' && result.results.length > 0) {
-                            item.dead = !result.results[0].accessible;
-                            if (item.dead) deadCount++;
+                            if (!result.results[0].accessible) {
+                                deadLinks.push(item.title || item.url);
+                            }
                         }
                     }
                 } catch (e) {}
@@ -123,7 +124,6 @@ export async function checkDeadLinks(navData, options) {
                 const progressText = document.getElementById('progressText');
                 if (progressBar) progressBar.style.width = progress + '%';
                 if (progressText) progressText.textContent = `${checked} / ${total} (${progress}%)`;
-                if (checked % 10 === 0 || checked === total) renderCards();
             })();
         });
         
@@ -135,11 +135,11 @@ export async function checkDeadLinks(navData, options) {
         setTimeout(() => progressOverlay.remove(), 1000);
         
         if (typeof onResult === 'function') {
-            onResult(deadCount);
-        } else if (deadCount === 0) {
+            onResult(deadLinks);
+        } else if (deadLinks.length === 0) {
             showToast('✅ 检查完成！所有链接都正常');
         } else {
-            showToast(`🔍 发现 ${deadCount} 个失效链接，请在编辑模式下查看`);
+            showToast(`🔍 检查完成，发现 ${deadLinks.length} 个可能失效的链接`);
         }
     } catch (error) {
         progressOverlay.remove();

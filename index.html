@@ -6,8 +6,8 @@
     <title>导航1024</title>
     <link rel="icon" type="image/png" href="image/logo.png">
     <link rel="apple-touch-icon" href="image/logo.png">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/m.css">
+    <link rel="stylesheet" href="css/style.css?v=2.3">
+    <link rel="stylesheet" href="css/m.css?v=2.3">
     <script type="module">
         import { shareUrl, exportData, importData, checkDeadLinks } from './js/utils.js';
         window.utils = { shareUrl, exportData, importData, checkDeadLinks };
@@ -94,11 +94,11 @@
                             <button class="theme-toggle-inline" id="themeToggle" title="切换主题">🌙</button>
                         </div>
                         <div class="search-buttons-mobile">
-                            <button class="search-btn-mobile" onclick="doSearch()" title="搜索">🔍</button>
-                            <button class="netdisk-btn-mobile" onclick="doNetdiskSearch(true)" title="网盘搜索">☁️</button>
+                            <button class="search-btn-mobile" id="mobileSearchBtn" title="搜索">🔍</button>
+                            <button class="netdisk-btn-mobile" id="mobileNetdiskBtn" title="网盘搜索">☁️</button>
                         </div>
-                        <button class="search-btn" onclick="doSearch()">搜索</button>
-                        <button class="netdisk-search-btn" onclick="doNetdiskSearch(true)" title="网盘资源搜索（新标签页打开）">
+                        <button class="search-btn" id="desktopSearchBtn" onclick="handleDesktopSearchClick()" title="站内搜索（有结果时再次点击使用外部搜索引擎）">搜索</button>
+                        <button class="netdisk-search-btn" id="desktopNetdiskBtn" onclick="handleDesktopNetdiskClick()" title="网盘资源搜索（新标签页打开）">
                             <span class="btn-text">网盘搜索</span>
                             <span class="btn-badge">HOT</span>
                         </button>
@@ -111,7 +111,9 @@
                 </div>
 
                 <!-- 卡片区域 -->
-                <div class="mobile-card-grid" id="cardGrid">
+                <div class="mobile-card-grid" id="cardGrid" 
+                     ondragover="handleGridDragOver(event)" 
+                     ondrop="handleGridDrop(event)">
                     <!-- JS 生成 -->
                 </div>
             </main>
@@ -214,6 +216,7 @@
         // --- 全局变量 ---
         let navData = [];
         let currentCategory = '全部';
+        let currentSubcategory = 'all'; // 当前选中的子分类（'all' 表示显示所有一级分类下的网址）
         let isEditMode = false;
         let nextId = 1;
         
@@ -226,6 +229,7 @@
         let BANNER_IMAGE = '';
         let BANNER_TITLE = '欢迎使用个人导航站';
         let BANNER_SUBTITLE = '快速访问您常用的网站';
+        let SHOW_RECENT_VISITS = true; // 是否显示最近访问
         
         // 网盘搜索配置
         let NETDISK_SEARCH_URL = localStorage.getItem('netdiskSearchUrl') || 'http://localhost:3000';
@@ -264,6 +268,55 @@
             if (dateEl) dateEl.textContent = dateStr;
         }
 
+        // --- 渲染图标（优先使用缓存，避免闪烁） ---
+        function renderIcon(item, isRecent = false) {
+            const faviconUrl = getFavicon(item.url);
+            const firstLetter = (item.title || '?')[0].toUpperCase();
+            const fontSize = isRecent ? '14px' : '18px';
+            const fontColor = isRecent ? '#4a90e2' : 'var(--primary-color)';
+            const padding = isRecent ? 'padding: 5px;' : '';
+            
+            if (!faviconUrl) {
+                // 无 favicon，直接显示文字
+                return `<span class="icon-fallback" style="width: 100%; height: 100%; align-items: center; justify-content: center; font-size: ${fontSize}; font-weight: bold; color: ${fontColor}; display: flex; ${padding}">${firstLetter}</span>`;
+            }
+            
+            // 检查是否已缓存
+            let isCached = false;
+            try {
+                const url = new URL(faviconUrl);
+                if (url.hostname === 'icon.horse') {
+                    const domain = url.pathname.replace('/icon/', '');
+                    isCached = faviconCache.has(domain);
+                }
+            } catch(e) {}
+            
+            // 统一使用 icon-wrapper 包裹
+            if (isCached) {
+                // 已缓存：图片 + 隐藏的文字 fallback（图片加载失败时显示）
+                return `<div class="icon-wrapper" style="position: relative; width: 100%; height: 100%;">
+                            <img src="${faviconUrl}" 
+                                alt="${item.title}" 
+                                loading="eager"
+                                class="icon-img cached"
+                                style="width: 100%; height: 100%; object-fit: contain; ${padding} position: relative; z-index: 2;"
+                                onerror="this.style.display='none'; this.parentElement.querySelector('.icon-fallback').style.display='flex';">
+                            <span class="icon-fallback" style="display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: ${fontSize}; font-weight: bold; color: ${fontColor}; z-index: 1; ${padding}">${firstLetter}</span>
+                        </div>`;
+            } else {
+                // 未缓存：先显示文字，图片加载成功后替换
+                return `<div class="icon-wrapper" style="position: relative; width: 100%; height: 100%;">
+                            <span class="icon-fallback" style="width: 100%; height: 100%; align-items: center; justify-content: center; font-size: ${fontSize}; font-weight: bold; color: ${fontColor}; display: flex; position: absolute; top: 0; left: 0; z-index: 1; ${padding}">${firstLetter}</span>
+                            <img src="${faviconUrl}" 
+                                alt="${item.title}" 
+                                class="icon-img loading"
+                                style="width: 100%; height: 100%; object-fit: contain; opacity: 0; position: absolute; top: 0; left: 0; z-index: 2; transition: opacity 0.15s ease; ${padding}"
+                                onload="this.style.opacity='1'; this.parentElement.querySelector('.icon-fallback').style.display='none';" 
+                                onerror="this.style.display='none'; this.parentElement.querySelector('.icon-fallback').style.display='flex';">
+                        </div>`;
+            }
+        }
+        
         // 获取网站 favicon
         function getFavicon(url) {
             try {
@@ -393,6 +446,7 @@
                         BANNER_IMAGE = result.config.banner_image || '';
                         BANNER_TITLE = result.config.banner_title || '欢迎使用个人导航站';
                         BANNER_SUBTITLE = result.config.banner_subtitle || '快速访问您常用的网站';
+                        SHOW_RECENT_VISITS = result.config.show_recent_visits !== undefined ? result.config.show_recent_visits : true;
                         
                         // 应用配置到页面
                         document.title = SITE_TITLE;
@@ -656,7 +710,7 @@
             const list = document.getElementById('categoryList');
             let html = '';
             
-            Object.keys(categoryTree).forEach(parentCat => {
+            Object.keys(categoryTree).forEach((parentCat, index) => {
                 const children = categoryTree[parentCat];
                 const hasChildren = children.some(c => c.isChild);
                 
@@ -664,14 +718,19 @@
                     // 有子分类的一级分类
                     const isActive = currentCategory === parentCat || children.some(c => c.name === currentCategory);
                     html += `
-                        <li class="category-parent ${isActive ? 'active' : ''}" onclick="toggleParentCategory('${parentCat}')">
+                        <li class="category-parent ${isEditMode ? 'category-drag-item' : ''} ${isActive ? 'active' : ''}" 
+                            ${isEditMode ? `draggable="true" ondragstart="handleCategoryDragStart(event, '${parentCat}')" ondragover="handleCategoryDragOver(event)" ondrop="handleCategoryDrop(event, '${parentCat}')" ondragend="handleCategoryDragEnd(event)"` : ''}
+                            onclick="toggleParentCategory('${parentCat}')">
+                            ${isEditMode ? '<span class="category-drag-handle" title="拖动排序">⋮⋮</span>' : ''}
                             <span class="category-name">${parentCat}</span>
                             <span class="category-arrow">▼</span>
                         </li>
                         <ul class="subcategory-list" id="subcat-${parentCat}" style="display: ${isActive ? 'block' : 'none'};">
-                            ${children.filter(c => c.isChild).map(child => `
-                                <li class="subcategory-item ${currentCategory === child.name ? 'active' : ''}" 
+                            ${children.filter(c => c.isChild).map((child, childIndex) => `
+                                <li class="subcategory-item ${isEditMode ? 'subcategory-drag-item' : ''} ${currentCategory === child.name ? 'active' : ''}" 
+                                    ${isEditMode ? `draggable="true" ondragstart="handleSubcategoryDragStart(event, '${child.name}', '${parentCat}')" ondragover="handleSubcategoryDragOver(event)" ondrop="handleSubcategoryDrop(event, '${child.name}', '${parentCat}')" ondragend="handleSubcategoryDragEnd(event)"` : ''}
                                     onclick="switchCategory('${child.name}')">
+                                    ${isEditMode ? '<span class="subcategory-drag-handle" title="拖动排序">⋮⋮</span>' : ''}
                                     ${child.name.split('-')[1].trim()}
                                 </li>
                             `).join('')}
@@ -680,8 +739,10 @@
                 } else {
                     // 普通一级分类
                     html += `
-                        <li class="category-item ${currentCategory === parentCat ? 'active' : ''}" 
+                        <li class="category-item ${isEditMode ? 'category-drag-item' : ''} ${currentCategory === parentCat ? 'active' : ''}" 
+                            ${isEditMode ? `draggable="true" ondragstart="handleCategoryDragStart(event, '${parentCat}')" ondragover="handleCategoryDragOver(event)" ondrop="handleCategoryDrop(event, '${parentCat}')" ondragend="handleCategoryDragEnd(event)"` : ''}
                             onclick="switchCategory('${parentCat}')">
+                            ${isEditMode ? '<span class="category-drag-handle" title="拖动排序">⋮⋮</span>' : ''}
                             ${parentCat}
                         </li>
                     `;
@@ -712,65 +773,243 @@
         }
 
         function renderCards() {
+            // 在重新渲染前保存编辑框中的内容
+            if (isEditMode) saveInputChanges();
+            
             const grid = document.getElementById('cardGrid');
             
             if (currentCategory === '全部') {
-                // 按分类分组显示
-                const categories = [...new Set(navData.map(item => item.category))];
+                // 按分类层级分组显示，使用标签页样式
+                const allCategories = [...new Set(navData.map(item => item.category))];
+                
+                // 解析分类树结构
+                const categoryTree = {};
+                const parentOrder = [];
+                
+                allCategories.forEach(cat => {
+                    if (cat.includes('-')) {
+                        // 二级分类
+                        const parts = cat.split('-');
+                        const parent = parts[0].trim();
+                        if (!categoryTree[parent]) {
+                            categoryTree[parent] = { parent: true, children: [] };
+                            parentOrder.push(parent);
+                        }
+                        categoryTree[parent].children.push(cat);
+                    } else {
+                        // 一级分类
+                        if (!categoryTree[cat]) {
+                            categoryTree[cat] = { parent: true, children: [] };
+                            parentOrder.push(cat);
+                        }
+                    }
+                });
+                
                 let html = '';
                 
-                categories.forEach(cat => {
-                    const filteredData = navData.filter(item => item.category === cat);
-                    if (filteredData.length > 0) {
-                        html += `<div class="category-section">
-                                    <h3 class="category-title">${cat}</h3>
-                                    <div class="card-row">
-                                        ${filteredData.map((item, index) => renderSingleCard(item, navData.indexOf(item))).join('')}
-                                    </div>
+                // 按顺序显示每个一级分类及其子分类，使用标签页
+                parentOrder.forEach(parentCat => {
+                    const treeItem = categoryTree[parentCat];
+                    const hasChildren = treeItem.children.length > 0;
+                    
+                    // 生成标签页
+                    html += '<div class="subcategory-tabs">';
+                    
+                    // "全部"标签（显示一级分类 + 所有二级分类）
+                    const parentData = navData.filter(item => item.category === parentCat);
+                    const allSubData = treeItem.children.reduce((acc, subcat) => {
+                        return acc.concat(navData.filter(item => item.category === subcat));
+                    }, []);
+                    const totalCount = parentData.length + allSubData.length;
+                    
+                    html += `<button class="subcategory-tab active" 
+                                 onclick="switchAllTab(this, '${parentCat}', 'all')">
+                                ${parentCat} (${totalCount})
+                             </button>`;
+                    
+                    // 各个二级分类标签
+                    treeItem.children.forEach(subcat => {
+                        const subData = navData.filter(item => item.category === subcat);
+                        if (subData.length > 0) {
+                            const subcatName = subcat.split('-')[1].trim();
+                            html += `<button class="subcategory-tab" 
+                                         onclick="switchAllTab(this, '${parentCat}', '${subcat}')">
+                                        ${subcatName} (${subData.length})
+                                     </button>`;
+                        }
+                    });
+                    
+                    html += '</div>';
+                    
+                    // 默认显示所有一级分类和二级分类的网址
+                    let allData = [...parentData];
+                    treeItem.children.forEach(subcat => {
+                        allData = allData.concat(navData.filter(item => item.category === subcat));
+                    });
+                    
+                    if (allData.length > 0) {
+                        html += `<div class="card-row" id="all-cards-${parentCat}">
+                                    ${allData.map((item, index) => renderSingleCard(item, index)).join('')}
+                                 </div>`;
+                    } else {
+                        html += `<div class="card-row" id="all-cards-${parentCat}">
+                                    <div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>
                                  </div>`;
                     }
                 });
-                grid.innerHTML = html;
-                initLazyIcons(); // 初始化懒加载
+                
+                grid.innerHTML = html || '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+                initLazyIcons();
+                
+                // 初始化下划线位置
+                setTimeout(initUnderlinePositions, 100);
                 return;
             }
 
             let filteredData;
             if (currentCategory.includes('-')) {
-                // 二级分类:只显示该二级分类
-                filteredData = navData.filter(item => item.category === currentCategory);
-            } else {
-                // 一级分类:显示该分类及其所有子分类
-                filteredData = navData.filter(item => {
-                    if (item.category === currentCategory) return true;
-                    // 检查是否是该一级分类的子分类
-                    if (item.category.includes('-')) {
-                        const parentCat = item.category.split('-')[0].trim();
-                        return parentCat === currentCategory;
-                    }
-                    return false;
+                // 二级分类:也显示标签页布局，焦点落在对应的二级分类上
+                const parentCat = currentCategory.split('-')[0].trim();
+                            
+                // 设置 currentSubcategory 为当前二级分类
+                currentSubcategory = currentCategory;
+                            
+                // 获取该一级分类下的所有二级分类
+                const allCategories = [...new Set(navData.map(item => item.category))];
+                const subcategories = allCategories.filter(cat => {
+                    if (!cat.includes('-')) return false;
+                    const pCat = cat.split('-')[0].trim();
+                    return pCat === parentCat;
                 });
+                            
+                let html = '';
+                            
+                // 生成标签页
+                html += '<div class="subcategory-tabs">';
+                            
+                // "全部"标签
+                const parentData = navData.filter(item => item.category === parentCat);
+                const allSubData = subcategories.reduce((acc, subcat) => {
+                    return acc.concat(navData.filter(item => item.category === subcat));
+                }, []);
+                const totalCount = parentData.length + allSubData.length;
+                            
+                html += `<button class="subcategory-tab ${currentSubcategory === 'all' ? 'active' : ''}" 
+                             onclick="switchSubcategory('all')">
+                            ${parentCat} (${totalCount})
+                         </button>`;
+                            
+                // 各个二级分类标签
+                subcategories.forEach(subcat => {
+                    const subData = navData.filter(item => item.category === subcat);
+                    if (subData.length > 0) {
+                        const subcatName = subcat.split('-')[1].trim();
+                        // 当前点击的二级分类设为 active
+                        const isActive = currentSubcategory === subcat ? 'active' : '';
+                        html += `<button class="subcategory-tab ${isActive}" 
+                                     onclick="switchSubcategory('${subcat}')">
+                                    ${subcatName} (${subData.length})
+                                 </button>`;
+                    }
+                });
+                            
+                html += '</div>';
+                            
+                // 显示当前二级分类的网址
+                filteredData = navData.filter(item => item.category === currentCategory);
+                if (filteredData.length > 0) {
+                    html += `<div class="card-row">
+                                ${filteredData.map((item, index) => renderSingleCard(item, index)).join('')}
+                             </div>`;
+                } else {
+                    html += '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+                }
+                            
+                grid.innerHTML = html;
+                initLazyIcons();
+                
+                // 初始化下划线位置
+                setTimeout(initUnderlinePositions, 100);
+            } else {
+                // 一级分类:显示标签页 + 网址
+                // 1. 先获取该一级分类下的所有二级分类名称
+                const allCategories = [...new Set(navData.map(item => item.category))];
+                const subcategories = allCategories.filter(cat => {
+                    if (!cat.includes('-')) return false;
+                    const parentCat = cat.split('-')[0].trim();
+                    return parentCat === currentCategory;
+                });
+                
+                let html = '';
+                
+                // 2. 生成标签页
+                html += '<div class="subcategory-tabs">';
+                
+                // “全部”标签（显示一级分类 + 所有二级分类）
+                const parentData = navData.filter(item => item.category === currentCategory);
+                const allSubData = subcategories.reduce((acc, subcat) => {
+                    return acc.concat(navData.filter(item => item.category === subcat));
+                }, []);
+                const totalCount = parentData.length + allSubData.length;
+                
+                html += `<button class="subcategory-tab ${currentSubcategory === 'all' ? 'active' : ''}" 
+                             onclick="switchSubcategory('all')">
+                            ${currentCategory} (${totalCount})
+                         </button>`;
+                
+                // 各个二级分类标签
+                subcategories.forEach(subcat => {
+                    const subData = navData.filter(item => item.category === subcat);
+                    if (subData.length > 0) {
+                        const subcatName = subcat.split('-')[1].trim();
+                        html += `<button class="subcategory-tab ${currentSubcategory === subcat ? 'active' : ''}" 
+                                     onclick="switchSubcategory('${subcat}')">
+                                    ${subcatName} (${subData.length})
+                                 </button>`;
+                    }
+                });
+                
+                html += '</div>';
+                
+                // 3. 根据当前选中的子分类显示网址
+                if (currentSubcategory === 'all') {
+                    // 显示所有一级分类和二级分类的网址
+                    let allData = [...parentData];
+                    subcategories.forEach(subcat => {
+                        allData = allData.concat(navData.filter(item => item.category === subcat));
+                    });
+                    
+                    if (allData.length > 0) {
+                        html += `<div class="card-row">
+                                    ${allData.map((item, index) => renderSingleCard(item, index)).join('')}
+                                 </div>`;
+                    } else {
+                        html += '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+                    }
+                } else {
+                    // 只显示指定二级分类的网址
+                    const subData = navData.filter(item => item.category === currentSubcategory);
+                    if (subData.length > 0) {
+                        html += `<div class="card-row">
+                                    ${subData.map((item, index) => renderSingleCard(item, index)).join('')}
+                                 </div>`;
+                    } else {
+                        html += '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+                    }
+                }
+                
+                grid.innerHTML = html;
+                initLazyIcons();
+                
+                // 初始化下划线位置
+                setTimeout(initUnderlinePositions, 100);
             }
-
-            if (filteredData.length === 0) {
-                grid.innerHTML = '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
-                return;
-            }
-
-            // 显示分类标题
-            const titleHtml = `<div class="category-section"><h3 class="category-title">${currentCategory}</h3></div>`;
-            
-            grid.innerHTML = `${titleHtml}
-                <div class="card-row">
-                    ${filteredData.map((item, index) => renderSingleCard(item, index)).join('')}
-                </div>`;
-            initLazyIcons(); // 初始化懒加载
         }
 
         // 抽取单个卡片渲染逻辑
         function renderSingleCard(item, index) {
             return `
-                <div class="card ${isEditMode ? 'editing' : ''} ${item.dead ? 'dead-link' : ''}" 
+                <div class="card ${isEditMode ? 'editing' : ''}" 
                      draggable="${isEditMode}" 
                      data-id="${item.id}"
                      data-index="${index}"
@@ -780,7 +1019,6 @@
                      ondragend="handleDragEnd(event)">
                     ${isEditMode ? `
                         <div style="position: absolute; top: 5px; right: 5px; cursor: move; font-size: 18px; opacity: 0.5;" title="拖拽排序">⋮⋮</div>
-                        ${item.dead ? '<div class="dead-badge">失效</div>' : ''}
                         <input type="text" class="edit-input" value="${item.title}" data-key="title" data-id="${item.id}">
                         <input type="text" class="edit-input" value="${item.url}" data-key="url" data-id="${item.id}">
                         <input type="text" class="edit-input" value="${item.desc}" data-key="desc" data-id="${item.id}">
@@ -793,18 +1031,12 @@
                         <a href="${item.url}" target="_blank" onclick="recordVisit(${item.id})" style="text-decoration:none; color:inherit; display: flex; flex-direction: column; height: 100%;">
                             <div class="card-header">
                                 <div class="card-icon" id="icon-${item.id}">
-                                    <img data-src="${getFavicon(item.url)}" 
-                                         alt="${item.title}" 
-                                         class="lazy-icon"
-                                         onerror="this.style.display='none'; const span = document.createElement('span'); span.textContent = '${(item.title || '?')[0].toUpperCase()}'; this.parentElement.appendChild(span);" 
-                                         onload="this.style.display='block';" 
-                                         style="width: 100%; height: 100%; object-fit: contain;">
+                                    ${renderIcon(item)}
                                 </div>
                                 <div class="card-title">${item.title}</div>
                             </div>
                             <div class="card-desc">${item.desc}</div>
                         </a>
-                        ${item.dead ? '<div class="dead-badge">链接失效</div>' : ''}
                     `}
                 </div>
             `;
@@ -817,11 +1049,38 @@
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const img = entry.target;
-                            img.src = img.dataset.src;
-                            img.classList.remove('lazy-icon');
+                            const imgSrc = img.dataset.src;
+                            
+                            // 检查是否已缓存
+                            let isCached = false;
+                            try {
+                                const url = new URL(imgSrc);
+                                if (url.hostname === 'icon.horse') {
+                                    const domain = url.pathname.replace('/icon/', '');
+                                    isCached = faviconCache.has(domain);
+                                }
+                            } catch(e) {}
+                            
+                            if (isCached) {
+                                // 已缓存的图标：立即显示，无需淡入
+                                img.src = imgSrc;
+                                img.classList.remove('lazy-icon');
+                            } else {
+                                // 未缓存的图标：淡入效果
+                                img.style.opacity = '0';
+                                img.style.transition = 'opacity 0.15s ease';
+                                img.onload = function() {
+                                    img.style.opacity = '1';
+                                };
+                                img.src = imgSrc;
+                                img.classList.remove('lazy-icon');
+                            }
+                            
                             observer.unobserve(img);
                         }
                     });
+                }, {
+                    rootMargin: '200px' // 提前200px开始加载
                 });
 
                 document.querySelectorAll('.lazy-icon').forEach(img => {
@@ -837,145 +1096,423 @@
 
         // --- 交互逻辑 ---
         function switchCategory(cat) {
+            // 保存编辑框中的内容再切换分类
+            if (isEditMode) saveInputChanges();
             currentCategory = cat;
+            currentSubcategory = 'all'; // 切换一级分类时，默认显示全部
+            hasLocalResults = false; // 重置搜索结果标记
             renderSidebar();
             renderCards();
             renderDrawerCategories();
             renderCategoryTabs();
         }
-
-        // 返回首页
-        function goHome(event) {
-            if (event) event.preventDefault();
-            switchCategory('全部');
-            closeDrawer();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // 网盘搜索功能
-        function doNetdiskSearch(openInNewTab = false) {
-            const keyword = document.getElementById('searchInput').value.trim();
-            if (!keyword) {
-                showToast('请输入搜索关键词');
-                document.getElementById('searchInput').focus();
-                return;
-            }
-            
-            // 使用配置的网盘搜索地址和参数
-            const baseUrl = NETDISK_SEARCH_URL.replace(/\/$/, ''); // 移除末尾斜杠
-            const netdiskUrl = `${baseUrl}/?ai=${encodeURIComponent(keyword)}`;
-            
-            if (openInNewTab) {
-                // 点击按钮：新标签页打开
-                window.open(netdiskUrl, '_blank');
-            } else {
-                // Ctrl+Enter：当前页跳转（确保激活）
-                window.location.href = netdiskUrl;
-            }
-        }
-
-        // 监听搜索框输入，检测触发字符串
-        const searchInput = document.getElementById('searchInput');
-        const searchClearBtn = document.getElementById('searchClearBtn');
         
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                const value = e.target.value;
-                
-                // 显示/隐藏清空按钮
-                if (searchClearBtn) {
-                    searchClearBtn.style.display = value ? 'block' : 'none';
+        // --- 切换子分类 ---
+        function switchSubcategory(subcat) {
+            currentSubcategory = subcat;
+            
+            // 如果切换到二级分类，更新 currentCategory
+            if (subcat !== 'all' && subcat.includes('-')) {
+                currentCategory = subcat;
+            } else if (subcat === 'all') {
+                // 如果切换到“全部”，保持当前一级分类
+                if (currentCategory.includes('-')) {
+                    currentCategory = currentCategory.split('-')[0].trim();
                 }
-                
-                if (value.trim() === EDIT_TRIGGER) {
-                    e.target.value = '';
-                    if (searchClearBtn) searchClearBtn.style.display = 'none';
-                    toggleEditMode();
-                }
-            });
-
-            // 清空按钮点击事件
-            if (searchClearBtn) {
-                searchClearBtn.addEventListener('click', function() {
-                    searchInput.value = '';
-                    this.style.display = 'none';
-                    searchInput.focus();
-                    if (currentCategory === '搜索结果') {
-                        switchCategory('全部');
-                    }
-                });
             }
-
-            // 监听回车搜索（使用 keydown 以支持 Ctrl 键检测）
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // 阻止默认行为
-                    const keyword = e.target.value.trim();
-                    if (keyword !== EDIT_TRIGGER) {
-                        // Ctrl+Enter 触发网盘搜索，普通 Enter 触发默认搜索
-                        if (e.ctrlKey || e.metaKey) { // 支持 Windows Ctrl 和 Mac Cmd
-                            doNetdiskSearch();
-                        } else {
-                            doSearch();
-                        }
-                    }
-                }
-            });
-        }
-
-        // 全局键盘快捷键
-        document.addEventListener('keydown', function(e) {
-            // / 键聚焦搜索框
-            if (e.key === '/' && e.target.tagName !== 'INPUT') {
-                e.preventDefault();
-                document.getElementById('searchInput').focus();
-            }
-        });
-
-        // --- 编辑模式 ---
-        async function toggleEditMode() {
-            if (isEditMode) {
-                // 退出编辑模式
-                isEditMode = false;
-                document.getElementById('globalEditControls').classList.remove('active');
+            
+            // 获取当前的卡片容器
+            const cardRow = document.querySelector('.card-row');
+            if (!cardRow) {
+                // 如果没有卡片容器，重新渲染整个页面
                 renderCards();
+                setTimeout(initUnderlinePositions, 100);
                 return;
             }
             
-            // 进入编辑模式，需要验证密码
-            const password = prompt('请输入管理员密码:');
-            if (!password) return;
-            
-            try {
-                const response = await fetch('api/verify.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: password })
+            // 只更新卡片内容，不重新创建标签页
+            let dataToShow;
+            if (subcat === 'all') {
+                // 显示所有一级和二级分类
+                const parentCat = currentCategory.includes('-') ? currentCategory.split('-')[0].trim() : currentCategory;
+                const parentData = navData.filter(item => item.category === parentCat);
+                const allCategories = [...new Set(navData.map(item => item.category))];
+                const subcategories = allCategories.filter(cat => {
+                    if (!cat.includes('-')) return false;
+                    const pCat = cat.split('-')[0].trim();
+                    return pCat === parentCat;
                 });
                 
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    isEditMode = true;
-                    document.getElementById('globalEditControls').classList.add('active');
-                    showToast('已进入编辑模式（可拖拽排序）');
-                    renderCards();
-                } else {
-                    showToast('密码错误');
-                }
-            } catch (error) {
-                console.error('验证失败:', error);
-                showToast('网络错误，请检查连接');
+                dataToShow = [...parentData];
+                subcategories.forEach(sc => {
+                    dataToShow = dataToShow.concat(navData.filter(item => item.category === sc));
+                });
+            } else {
+                // 只显示指定二级分类
+                dataToShow = navData.filter(item => item.category === subcat);
             }
+            
+            // 更新卡片内容
+            if (dataToShow.length > 0) {
+                cardRow.innerHTML = dataToShow.map((item, index) => renderSingleCard(item, index)).join('');
+            } else {
+                cardRow.innerHTML = '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+            }
+            
+            initLazyIcons();
+            
+            // 更新标签激活状态
+            document.querySelectorAll('.subcategory-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 找到对应的标签并激活
+            const tabs = document.querySelectorAll('.subcategory-tab');
+            tabs.forEach(tab => {
+                const onclickAttr = tab.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(`'${subcat}'`)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // 更新下划线位置（延迟确保DOM更新完成）
+            setTimeout(() => {
+                const activeTab = document.querySelector('.subcategory-tab.active');
+                if (activeTab) {
+                    updateUnderlinePosition(activeTab);
+                }
+            }, 50);
+        }
+        
+        // --- "全部"模式下的标签页切换 ---
+        function switchAllTab(button, parentCat, subcat) {
+            // 更新标签页的 active 状态
+            const tabsContainer = button.parentElement;
+            tabsContainer.querySelectorAll('.subcategory-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // 更新滑动下划线位置
+            updateUnderlinePosition(button);
+            
+            // 获取该一级分类下的所有二级分类
+            const allCategories = [...new Set(navData.map(item => item.category))];
+            const subcategories = allCategories.filter(cat => {
+                if (!cat.includes('-')) return false;
+                const parent = cat.split('-')[0].trim();
+                return parent === parentCat;
+            });
+            
+            // 根据选中的标签显示对应网址
+            const cardRow = document.getElementById(`all-cards-${parentCat}`);
+            if (!cardRow) return;
+            
+            let dataToShow = [];
+            
+            if (subcat === 'all') {
+                // 显示所有一级分类和二级分类的网址
+                const parentData = navData.filter(item => item.category === parentCat);
+                dataToShow = [...parentData];
+                subcategories.forEach(sc => {
+                    dataToShow = dataToShow.concat(navData.filter(item => item.category === sc));
+                });
+            } else {
+                // 只显示指定二级分类的网址
+                dataToShow = navData.filter(item => item.category === subcat);
+            }
+            
+            if (dataToShow.length > 0) {
+                cardRow.innerHTML = dataToShow.map((item, index) => renderSingleCard(item, index)).join('');
+            } else {
+                cardRow.innerHTML = '<div style="text-align:center; color:#999; width:100%; padding:50px;">暂无数据</div>';
+            }
+            
+            initLazyIcons();
+        }
+        
+        // --- 更新下划线位置 ---
+        function updateUnderlinePosition(button) {
+            const tabsContainer = button.parentElement;
+            
+            // 查找或创建下划线指示器
+            let indicator = tabsContainer.querySelector('.underline-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'underline-indicator';
+                tabsContainer.appendChild(indicator);
+            }
+            
+            // 使用 getBoundingClientRect 计算精确位置
+            const buttonRect = button.getBoundingClientRect();
+            const containerRect = tabsContainer.getBoundingClientRect();
+            
+            // 计算相对于容器的位置（考虑 padding）
+            const targetLeft = buttonRect.left - containerRect.left;
+            const targetWidth = buttonRect.width;
+            
+            // 使用 requestAnimationFrame 确保流畅
+            requestAnimationFrame(() => {
+                indicator.style.transform = `translateX(${targetLeft}px)`;
+                indicator.style.width = `${targetWidth}px`;
+            });
+        }
+        
+        // --- 初始化所有标签页的下划线位置 ---
+        function initUnderlinePositions() {
+            document.querySelectorAll('.subcategory-tabs').forEach(tabsContainer => {
+                const activeTab = tabsContainer.querySelector('.subcategory-tab.active');
+                if (activeTab) {
+                    updateUnderlinePosition(activeTab);
+                }
+            });
+        }
+        
+        // --- 分类拖拽排序功能 ---
+        let draggedCategory = null;
+
+        /**
+         * 开始拖拽分类
+         * @param {Event} e - 拖拽事件
+         * @param {string} categoryName - 被拖拽的分类名称
+         */
+        function handleCategoryDragStart(e, categoryName) {
+            // 在开始拖动前保存所有编辑框中的内容
+            if (isEditMode) saveInputChanges();
+            
+            // 阻止事件冒泡，避免触发点击事件
+            e.stopPropagation();
+            draggedCategory = categoryName;
+            e.dataTransfer.effectAllowed = 'move';
+            e.target.style.opacity = '0.4';
+            e.target.classList.add('dragging');
         }
 
-        // --- 拖拽排序功能 ---
+        /**
+         * 拖拽经过目标
+         * @param {Event} e - 拖拽事件
+         */
+        function handleCategoryDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        /**
+         * 放下分类，执行排序
+         * @param {Event} e - 拖拽事件
+         * @param {string} targetCategory - 目标分类名称
+         */
+        function handleCategoryDrop(e, targetCategory) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!draggedCategory || draggedCategory === targetCategory) return;
+            
+            // 获取所有分类（保持当前顺序）
+            const allCategories = ['全部', ...new Set(navData.map(item => item.category))];
+            
+            const draggedIndex = allCategories.indexOf(draggedCategory);
+            const targetIndex = allCategories.indexOf(targetCategory);
+            
+            if (draggedIndex === -1 || targetIndex === -1) return;
+            
+            // 移除被拖动的分类
+            const [removedCategory] = allCategories.splice(draggedIndex, 1);
+            
+            // 计算新的插入位置
+            let insertIndex = targetIndex;
+            if (draggedIndex < targetIndex) {
+                // 从前往后拖，插入位置需要减1（因为已经移除了一个元素）
+                insertIndex = targetIndex - 1;
+            }
+            
+            // 插入到新位置
+            allCategories.splice(insertIndex, 0, removedCategory);
+            
+            // 根据新的分类顺序重新排列 navData
+            const reorderedData = [];
+            allCategories.forEach(cat => {
+                if (cat === '全部') return; // 跳过"全部"
+                const items = navData.filter(item => item.category === cat);
+                reorderedData.push(...items);
+            });
+            
+            navData = reorderedData;
+            
+            showToast('已调整分类顺序（需点击保存才生效）');
+            renderSidebar();
+            renderCards();
+        }
+
+        /**
+         * 结束拖拽
+         * @param {Event} e - 拖拽事件
+         */
+        function handleCategoryDragEnd(e) {
+            e.target.style.opacity = '1';
+            e.target.classList.remove('dragging');
+            draggedCategory = null;
+        }
+
+        // --- 二级分类拖拽排序功能 ---
+        let draggedSubcategory = null;
+        let draggedSubcategoryParent = null;
+
+        /**
+         * 开始拖拽二级分类
+         * @param {Event} e - 拖拽事件
+         * @param {string} subcategoryName - 被拖拽的二级分类名称
+         * @param {string} parentCat - 父分类名称
+         */
+        function handleSubcategoryDragStart(e, subcategoryName, parentCat) {
+            // 在开始拖动前保存所有编辑框中的内容
+            if (isEditMode) saveInputChanges();
+            
+            e.stopPropagation();
+            draggedSubcategory = subcategoryName;
+            draggedSubcategoryParent = parentCat;
+            e.dataTransfer.effectAllowed = 'move';
+            e.target.style.opacity = '0.4';
+            e.target.classList.add('dragging');
+        }
+
+        /**
+         * 二级分类拖拽经过目标
+         * @param {Event} e - 拖拽事件
+         */
+        function handleSubcategoryDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        /**
+         * 放下二级分类，执行排序
+         * @param {Event} e - 拖拽事件
+         * @param {string} targetSubcategory - 目标二级分类名称
+         * @param {string} parentCat - 父分类名称
+         */
+        function handleSubcategoryDrop(e, targetSubcategory, parentCat) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!draggedSubcategory || draggedSubcategory === targetSubcategory) return;
+            if (draggedSubcategoryParent !== parentCat) {
+                showToast('只能在同一父分类下排序');
+                return;
+            }
+            
+            // 获取该父分类下的所有二级分类（保持当前顺序）
+            const allCategories = ['全部', ...new Set(navData.map(item => item.category))];
+            const subcategories = allCategories.filter(cat => {
+                if (!cat.includes('-')) return false;
+                const parts = cat.split('-');
+                const parent = parts[0].trim();
+                return parent === parentCat;
+            });
+            
+            const draggedIndex = subcategories.indexOf(draggedSubcategory);
+            const targetIndex = subcategories.indexOf(targetSubcategory);
+            
+            if (draggedIndex === -1 || targetIndex === -1) return;
+            
+            // 移除被拖动的二级分类
+            const [removedSubcategory] = subcategories.splice(draggedIndex, 1);
+            
+            // 计算新的插入位置
+            let insertIndex = targetIndex;
+            if (draggedIndex < targetIndex) {
+                // 从前往后拖，插入位置需要减1（因为已经移除了一个元素）
+                insertIndex = targetIndex - 1;
+            }
+            
+            // 插入到新位置
+            subcategories.splice(insertIndex, 0, removedSubcategory);
+            
+            // 根据新的二级分类顺序重新排列 navData
+            const reorderedData = [];
+            
+            // 先添加不属于该父分类的项目
+            navData.forEach(item => {
+                if (!item.category.includes('-')) {
+                    reorderedData.push(item);
+                } else {
+                    const parts = item.category.split('-');
+                    const parent = parts[0].trim();
+                    if (parent !== parentCat) {
+                        reorderedData.push(item);
+                    }
+                }
+            });
+            
+            // 再按新顺序添加该父分类下的项目
+            const tempData = [...reorderedData];
+            reorderedData.length = 0;
+            
+            // 先添加非该父分类的项目
+            tempData.forEach(item => {
+                if (!item.category.includes('-')) {
+                    reorderedData.push(item);
+                } else {
+                    const parts = item.category.split('-');
+                    const parent = parts[0].trim();
+                    if (parent !== parentCat) {
+                        reorderedData.push(item);
+                    }
+                }
+            });
+            
+            // 按新顺序添加该父分类下的项目
+            subcategories.forEach(subcat => {
+                const items = navData.filter(item => item.category === subcat);
+                reorderedData.push(...items);
+            });
+            
+            // 添加该父分类本身的项目（如果有）
+            const parentItems = navData.filter(item => item.category === parentCat);
+            if (parentItems.length > 0) {
+                // 将父分类项目插入到第一个子分类之前
+                const firstSubcatIndex = reorderedData.findIndex(item => {
+                    if (!item.category.includes('-')) return false;
+                    const parts = item.category.split('-');
+                    return parts[0].trim() === parentCat;
+                });
+                if (firstSubcatIndex !== -1) {
+                    reorderedData.splice(firstSubcatIndex, 0, ...parentItems);
+                } else {
+                    reorderedData.push(...parentItems);
+                }
+            }
+            
+            navData = reorderedData;
+            
+            showToast('已调整二级分类顺序（需点击保存才生效）');
+            renderSidebar();
+            renderCards();
+        }
+
+        /**
+         * 结束二级分类拖拽
+         * @param {Event} e - 拖拽事件
+         */
+        function handleSubcategoryDragEnd(e) {
+            e.target.style.opacity = '1';
+            e.target.classList.remove('dragging');
+            draggedSubcategory = null;
+            draggedSubcategoryParent = null;
+        }
+
+        // --- 卡片拖拽排序功能 ---
         let draggedElement = null;
-        let draggedIndex = null;
+        let draggedItemId = null;  // 改为使用 ID 而不是 index
 
         function handleDragStart(e) {
+            // 在开始拖动前保存所有编辑框中的内容
+            if (isEditMode) saveInputChanges();
+            
             draggedElement = e.target.closest('.card');
-            draggedIndex = parseInt(draggedElement.dataset.index);
+            draggedItemId = parseInt(draggedElement.dataset.id);  // 记录 ID
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', draggedElement.innerHTML);
             draggedElement.style.opacity = '0.4';
@@ -998,23 +1535,88 @@
             const targetCard = e.target.closest('.card');
             
             if (targetCard && targetCard !== draggedElement) {
-                const targetIndex = parseInt(targetCard.dataset.index);
+                // 先保存当前编辑框中的内容
+                saveInputChanges();
                 
-                const filteredData = currentCategory === '全部' 
-                    ? [...navData] 
-                    : navData.filter(item => item.category === currentCategory);
+                const targetItemId = parseInt(targetCard.dataset.id);
                 
-                const draggedItem = filteredData[draggedIndex];
-                const targetItem = filteredData[targetIndex];
+                // 直接使用 ID 查找真实索引
+                const draggedRealIndex = navData.findIndex(item => item.id === draggedItemId);
+                const targetRealIndex = navData.findIndex(item => item.id === targetItemId);
                 
-                const draggedRealIndex = navData.findIndex(item => item.id === draggedItem.id);
-                const targetRealIndex = navData.findIndex(item => item.id === targetItem.id);
+                if (draggedRealIndex === -1 || targetRealIndex === -1) {
+                    console.error('找不到拖动的项或目标项');
+                    return;
+                }
                 
-                [navData[draggedRealIndex], navData[targetRealIndex]] = [navData[targetRealIndex], navData[draggedRealIndex]];
+                // 移除被拖动的项
+                const [removedItem] = navData.splice(draggedRealIndex, 1);
+                
+                // 计算新的插入位置
+                let insertIndex = targetRealIndex;
+                if (draggedRealIndex < targetRealIndex) {
+                    // 从前往后拖，插入位置需要减1（因为已经移除了一个元素）
+                    insertIndex = targetRealIndex - 1;
+                }
+                
+                // 插入到新位置
+                navData.splice(insertIndex, 0, removedItem);
                 
                 showToast('已调整顺序（需点击保存才生效）');
                 renderCards();
             }
+        }
+        
+        // 处理网格容器的 dragover 事件
+        function handleGridDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+        
+        // 处理网格容器的 drop 事件（拖动到空白区域）
+        function handleGridDrop(e) {
+            e.preventDefault();
+            
+            // 检查是否真的 drop 在空白区域（而不是卡片上）
+            const targetCard = e.target.closest('.card');
+            if (targetCard) {
+                // 如果 drop 在卡片上，由 handleDrop 处理
+                return;
+            }
+            
+            if (draggedElement && draggedItemId) {
+                // 先保存当前编辑框中的内容
+                saveInputChanges();
+                
+                // 直接使用 ID 查找真实索引
+                const draggedRealIndex = navData.findIndex(item => item.id === draggedItemId);
+                
+                if (draggedRealIndex === -1) {
+                    console.error('找不到拖动的项');
+                    return;
+                }
+                
+                // 移除被拖动的项
+                const [removedItem] = navData.splice(draggedRealIndex, 1);
+                
+                // 插入到最后
+                navData.push(removedItem);
+                
+                showToast('已调整顺序（需点击保存才生效）');
+                renderCards();
+            }
+        }
+        
+        // 保存编辑框中的修改
+        function saveInputChanges() {
+            const inputs = document.querySelectorAll('.edit-input');
+            inputs.forEach(input => {
+                const id = parseInt(input.getAttribute('data-id'));
+                const key = input.getAttribute('data-key');
+                const value = input.value;
+                const item = navData.find(i => i.id === id);
+                if (item) item[key] = value;
+            });
         }
 
         function handleDragEnd(e) {
@@ -1026,11 +1628,13 @@
                 card.classList.remove('dragging');
             });
             draggedElement = null;
-            draggedIndex = null;
+            draggedItemId = null;  // 清空 ID
         }
 
         function deleteItem(id) {
             if(confirm('确定删除这个网址吗？')) {
+                // 先保存编辑框中的内容
+                saveInputChanges();
                 navData = navData.filter(item => item.id !== id);
                 renderCards();
                 renderSidebar();
@@ -1096,7 +1700,146 @@
             isEditMode = false;
             document.getElementById('globalEditControls').classList.remove('active');
             renderCards();
+            renderSidebar();  // 重要：重新渲染侧边栏以移除拖拽属性
         }
+
+        // --- 切换编辑模式 ---
+        async function toggleEditMode() {
+            if (isEditMode) {
+                // 退出编辑模式
+                isEditMode = false;
+                document.getElementById('globalEditControls').classList.remove('active');
+                renderCards();
+                renderSidebar();  // 重要：重新渲染侧边栏以移除拖拽属性
+                return;
+            }
+            
+            // 进入编辑模式，需要验证密码
+            const password = prompt('请输入管理员密码:');
+            if (!password) return;
+            
+            try {
+                const response = await fetch('api/verify.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    isEditMode = true;
+                    document.getElementById('globalEditControls').classList.add('active');
+                    showToast('已进入编辑模式（可拖拽排序）');
+                    renderCards();
+                    renderSidebar();  // 重要：重新渲染侧边栏以添加拖拽属性
+                } else {
+                    showToast('密码错误');
+                }
+            } catch (error) {
+                console.error('验证失败:', error);
+                showToast('网络错误，请检查连接');
+            }
+        }
+
+        // 返回首页
+        function goHome(event) {
+            if (event) event.preventDefault();
+            switchCategory('全部');
+            closeDrawer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 网盘搜索功能
+        function doNetdiskSearch(openInNewTab = false) {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                showToast('请输入搜索关键词');
+                document.getElementById('searchInput').focus();
+                return;
+            }
+            
+            // 使用配置的网盘搜索地址和参数
+            const baseUrl = NETDISK_SEARCH_URL.replace(/\/$/, ''); // 移除末尾斜杠
+            const netdiskUrl = `${baseUrl}/?ai=${encodeURIComponent(keyword)}`;
+            
+            if (openInNewTab) {
+                // 点击按钮：新标签页打开
+                window.open(netdiskUrl, '_blank');
+            } else {
+                // Ctrl+Enter：当前页跳转（确保激活）
+                window.location.href = netdiskUrl;
+            }
+        }
+
+        // 监听搜索框输入，检测触发字符串
+        const searchInput = document.getElementById('searchInput');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // 显示/隐藏清空按钮
+                if (searchClearBtn) {
+                    searchClearBtn.style.display = value ? 'block' : 'none';
+                }
+                
+                if (value.trim() === EDIT_TRIGGER) {
+                    e.target.value = '';
+                    if (searchClearBtn) searchClearBtn.style.display = 'none';
+                    toggleEditMode();
+                }
+            });
+
+            // 清空按钮点击事件
+            if (searchClearBtn) {
+                searchClearBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    this.style.display = 'none';
+                    searchInput.focus();
+                    hasLocalResults = false; // 重置搜索结果标记
+                    if (currentCategory === '搜索结果') {
+                        switchCategory('全部');
+                    }
+                });
+            }
+
+            // 监听回车搜索（使用 keydown 以支持 Ctrl 键检测）
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // 阻止默认行为
+                    const keyword = e.target.value.trim();
+                    if (keyword !== EDIT_TRIGGER) {
+                        // Ctrl+Enter 触发网盘搜索，普通 Enter 触发默认搜索
+                        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+                            doNetdiskSearch();
+                        } else {
+                            doSearch();
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 桌面端搜索按钮点击处理
+        function handleDesktopSearchClick() {
+            doSearch();
+        }
+        
+        // 桌面端网盘搜索按钮点击处理
+        function handleDesktopNetdiskClick() {
+            doNetdiskSearch(true);
+        }
+
+        // 全局键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // / 键聚焦搜索框
+            if (e.key === '/' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
 
         // --- 添加新网址功能 ---
         function showAddForm() {
@@ -1248,6 +1991,8 @@
             
             hideAddForm();
             
+            // 在编辑模式下，添加新卡片前先保存其他卡片的编辑内容
+            if (isEditMode) saveInputChanges();
             renderCards();
             renderSidebar();
             
@@ -1319,209 +2064,21 @@
             }
         }
 
-        // --- 死链检测 ---
+// --- 死链检测 ---
         async function checkDeadLinks() {
             if (window.utils && window.utils.checkDeadLinks) {
                 await window.utils.checkDeadLinks(navData, {
-                    renderCards: renderCards,
                     showToast: showToast,
-                    onResult: showDeadLinksResult
+                    onResult: function(deadLinks) {
+                        if (deadLinks.length === 0) {
+                            showToast('✅ 检查完成！所有链接都正常');
+                        } else {
+                            showToast(`🔍 检查完成，发现 ${deadLinks.length} 个可能失效的链接，请手动确认`);
+                        }
+                    }
                 });
             }
-        }
-
-        // --- 显示死链检查结果 ---
-        function showDeadLinksResult(deadCount) {
-            if (deadCount === 0) {
-                showToast('✅ 检查完成！所有链接都正常');
-                return;
-            }
-            
-            // 获取所有失效链接
-            const deadLinks = navData.filter(item => item.dead);
-            
-            // 创建对话框
-            const overlay = document.createElement('div');
-            overlay.id = 'deadLinksDialog';
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.7);
-                z-index: 5000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            `;
-            
-            const dialog = document.createElement('div');
-            dialog.style.cssText = `
-                background: white;
-                border-radius: 12px;
-                padding: 0;
-                max-width: 800px;
-                width: 90%;
-                max-height: 80vh;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-            `;
-            
-            // 标题栏
-            const header = document.createElement('div');
-            header.style.cssText = `
-                padding: 20px;
-                border-bottom: 1px solid #eee;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            `;
-            header.innerHTML = `
-                <h3 style="margin: 0; color: #333;">🔍 发现 ${deadCount} 个失效链接</h3>
-                <button onclick="closeDeadLinksDialog()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
-            `;
-            
-            // 工具栏
-            const toolbar = document.createElement('div');
-            toolbar.style.cssText = `
-                padding: 15px 20px;
-                border-bottom: 1px solid #eee;
-                display: flex;
-                gap: 10px;
-                background: #f9f9f9;
-            `;
-            toolbar.innerHTML = `
-                <button id="selectAllBtn" onclick="toggleSelectAll()" style="padding: 8px 16px; background: #1890ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">全选</button>
-                <button onclick="deleteSelectedDeadLinks()" style="padding: 8px 16px; background: #ff4d4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">删除选中</button>
-                <button onclick="deleteAllDeadLinks()" style="padding: 8px 16px; background: #fa8c16; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">删除全部</button>
-                <span style="flex: 1;"></span>
-                <button onclick="closeDeadLinksDialog()" style="padding: 8px 16px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">关闭</button>
-            `;
-            
-            // 列表区域
-            const listContainer = document.createElement('div');
-            listContainer.id = 'deadLinksList';
-            listContainer.style.cssText = `
-                flex: 1;
-                overflow-y: auto;
-                padding: 10px;
-            `;
-            
-            // 生成列表项
-            deadLinks.forEach((item, index) => {
-                const listItem = document.createElement('div');
-                listItem.style.cssText = `
-                    padding: 12px;
-                    margin-bottom: 8px;
-                    background: #fff;
-                    border: 1px solid #ffe58f;
-                    border-radius: 6px;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                `;
-                listItem.innerHTML = `
-                    <input type="checkbox" class="dead-link-checkbox" data-id="${item.id}" style="width: 18px; height: 18px; cursor: pointer;">
-                    <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: bold; color: #333;">${item.title}</div>
-                    </div>
-                    <button onclick="testDeadLink('${item.url}')" style="padding: 6px 12px; background: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">测试</button>
-                    <button onclick="deleteSingleDeadLink(${item.id})" style="padding: 6px 12px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">删除</button>
-                `;
-                listContainer.appendChild(listItem);
-            });
-            
-            dialog.appendChild(header);
-            dialog.appendChild(toolbar);
-            dialog.appendChild(listContainer);
-            overlay.appendChild(dialog);
-            document.body.appendChild(overlay);
-        }
-        
-        // 关闭对话框
-        function closeDeadLinksDialog() {
-            const overlay = document.getElementById('deadLinksDialog');
-            if (overlay && overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
-            }
-        }
-        
-        // 全选/取消全选
-        function toggleSelectAll() {
-            const checkboxes = document.querySelectorAll('.dead-link-checkbox');
-            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            checkboxes.forEach(cb => cb.checked = !allChecked);
-            
-            const btn = document.getElementById('selectAllBtn');
-            btn.textContent = allChecked ? '全选' : '取消全选';
-        }
-        
-        // 测试单个链接
-        function testDeadLink(url) {
-            window.open(url, '_blank');
-        }
-        
-        // 删除单个失效链接
-        function deleteSingleDeadLink(id) {
-            if (confirm('确定删除这个网址吗？')) {
-                navData = navData.filter(item => item.id !== id);
-                renderCards();
-                renderSidebar();
-                
-                // 从列表中移除
-                const checkbox = document.querySelector(`.dead-link-checkbox[data-id="${id}"]`);
-                if (checkbox) {
-                    const listItem = checkbox.closest('div[style*="padding: 12px"]');
-                    if (listItem) listItem.remove();
-                }
-                
-                showToast('已删除');
-            }
-        }
-        
-        // 删除选中的失效链接
-        function deleteSelectedDeadLinks() {
-            const checkboxes = document.querySelectorAll('.dead-link-checkbox:checked');
-            if (checkboxes.length === 0) {
-                showToast('请先选择要删除的链接');
-                return;
-            }
-            
-            if (!confirm(`确定删除选中的 ${checkboxes.length} 个网址吗？`)) return;
-            
-            const idsToDelete = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
-            navData = navData.filter(item => !idsToDelete.includes(item.id));
-            renderCards();
-            renderSidebar();
-            
-            // 从列表中移除
-            checkboxes.forEach(cb => {
-                const listItem = cb.closest('div[style*="padding: 12px"]');
-                if (listItem) listItem.remove();
-            });
-            
-            showToast(`已删除 ${idsToDelete.length} 个网址`);
-        }
-        
-        // 删除所有失效链接
-        function deleteAllDeadLinks() {
-            const deadLinks = navData.filter(item => item.dead);
-            if (deadLinks.length === 0) {
-                showToast('没有失效链接');
-                return;
-            }
-            
-            if (!confirm(`确定删除所有 ${deadLinks.length} 个失效链接吗？`)) return;
-            
-            navData = navData.filter(item => !item.dead);
-            renderCards();
-            renderSidebar();
-            
-            closeDeadLinksDialog();
-            showToast(`已删除 ${deadLinks.length} 个失效链接`);
-        }
+}
 
         // --- 分享功能 ---
         function shareUrl(title, url) {
@@ -1531,10 +2088,18 @@
         }
 
         // --- 全文搜索 ---
+        let hasLocalResults = false; // 标记是否有站内结果
+        
         function doSearch() {
             const engine = document.getElementById('searchEngine').value;
             const keyword = document.getElementById('searchInput').value.trim();
             if (!keyword) return;
+            
+            // 如果已经有站内结果，再次搜索则使用外部引擎
+            if (hasLocalResults && currentCategory === '搜索结果') {
+                openExternalSearch(engine, keyword);
+                return;
+            }
             
             // 先尝试站内搜索
             const localResults = navData.filter(item => 
@@ -1545,11 +2110,19 @@
             
             if (localResults.length > 0) {
                 // 显示搜索结果
+                hasLocalResults = true;
                 showSearchResults(localResults, keyword);
+                showToast(`找到 ${localResults.length} 个相关结果，再次点击搜索将使用外部搜索引擎`);
                 return;
             }
             
             // 如果没有本地结果,使用外部搜索引擎
+            hasLocalResults = false;
+            openExternalSearch(engine, keyword);
+        }
+        
+        // 打开外部搜索引擎
+        function openExternalSearch(engine, keyword) {
             let url = '';
             if(engine === 'baidu') url = `https://www.baidu.com/s?wd=${encodeURIComponent(keyword)}`;
             if(engine === 'google') url = `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
@@ -1571,12 +2144,7 @@
                     <a href="${item.url}" target="_blank" style="text-decoration:none; color:inherit;">
                         <div class="card-header">
                             <div class="card-icon" id="icon-search-${item.id}">
-                                <img data-src="${getFavicon(item.url)}" 
-                                     alt="${item.title}" 
-                                     class="lazy-icon"
-                                     onerror="this.style.display='none'; const span = document.createElement('span'); span.textContent = '${(item.title || '?')[0].toUpperCase()}'; this.parentElement.appendChild(span);" 
-                                     onload="this.style.display='block';" 
-                                     style="width: 100%; height: 100%; object-fit: contain;">
+                                ${renderIcon(item)}
                             </div>
                             <div class="card-title">${highlightText(item.title, keyword)}</div>
                         </div>
@@ -1631,6 +2199,9 @@
 
         // --- 刷新图标 ---
         function refreshFavicons() {
+            // 在编辑模式下，刷新前先保存编辑内容
+            if (isEditMode) saveInputChanges();
+            
             faviconCache.clear();
             renderCards();
             showToast('图标缓存已清除，页面将重新加载图标');
@@ -1654,6 +2225,11 @@
         // --- 导入数据 ---
         function importData(event) {
             if (window.utils && window.utils.importData) {
+                // 在编辑模式下，导入前先保存当前编辑内容
+                if (isEditMode) {
+                    saveInputChanges();
+                }
+                
                 window.utils.importData(event, {
                     showToast: showToast,
                     onSuccess: function(validatedData) {
@@ -1732,6 +2308,15 @@
 
         // --- 渲染最近访问 ---
         function renderRecentVisits() {
+            // 如果配置为不显示，直接隐藏
+            if (!SHOW_RECENT_VISITS) {
+                const container = document.getElementById('recentVisits');
+                if (container) {
+                    container.style.display = 'none';
+                }
+                return;
+            }
+            
             const container = document.getElementById('recentVisits');
             const list = document.getElementById('recentList');
             
@@ -1749,10 +2334,7 @@
                 return `
                     <li class="recent-item" onclick="recordVisit(${item.id}); window.open('${item.url}', '_blank');" title="${item.title}">
                         <div class="recent-icon">
-                            <img src="${getFavicon(item.url)}" 
-                                 alt="${item.title}"
-                                 onerror="this.style.display='none'; const span = document.createElement('span'); span.textContent = '${(item.title || '?')[0].toUpperCase()}'; this.parentElement.appendChild(span);" 
-                                 onload="this.style.display='block';">
+                            ${renderIcon(item, true)}
                         </div>
                     </li>
                 `;

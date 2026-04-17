@@ -58,7 +58,8 @@ body {
     background: var(--bg-color); 
     min-height: 100vh; 
     display: flex; 
-    color: var(--text-main); 
+    color: var(--text-main);
+    overflow-x: hidden; /* 禁止横向滚动 */
 }
 
 /* 应用容器 - 左右布局 */
@@ -84,7 +85,6 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
 }
 
 /* 侧边栏 */
@@ -103,8 +103,26 @@ body {
 }
 .sidebar h2 { text-align: center; padding: 25px 0; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .category-list { list-style: none; overflow-y: auto; flex: 1; }
-.category-item { padding: 15px 25px; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; }
+.category-item { 
+    padding: 15px 25px; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    border-left: 4px solid transparent;
+    display: flex;
+    align-items: center;
+}
 .category-item:hover, .category-item.active { background: rgba(255,255,255,0.1); border-left-color: var(--primary-color); }
+.category-drag-item { cursor: move; }
+.category-drag-item:hover { background: rgba(74, 144, 226, 0.3); }
+.category-drag-handle { 
+    display: inline-block !important;
+    flex-shrink: 0;
+}
+
+/* 编辑模式下，拖拽手柄与分类文本之间的间距 */
+.category-item .category-drag-handle {
+    margin-right: 8px;
+}
 
 /* 一级分类(带子分类) */
 .category-parent {
@@ -113,7 +131,6 @@ body {
     transition: 0.2s;
     border-left: 4px solid transparent;
     display: flex;
-    justify-content: space-between;
     align-items: center;
 }
 .category-parent:hover, .category-parent.active {
@@ -127,6 +144,7 @@ body {
     font-size: 10px;
     opacity: 0.6;
     transition: transform 0.2s;
+    margin-left: auto;
 }
 
 /* 二级分类列表 */
@@ -155,7 +173,6 @@ body {
     flex: 1; 
     display: flex; 
     flex-direction: column; 
-    overflow-y: auto; 
     padding: 20px; 
     position: relative; 
 }
@@ -186,7 +203,13 @@ body {
     height: 42px;
 }
 
-.search-buttons-mobile { display: none; }
+.search-buttons-mobile { 
+    display: none; 
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    opacity: 0;
+}
 .mobile-float-btns { display: none; }
 
 /* 内联主题切换按钮 */
@@ -359,6 +382,8 @@ body.dark-mode .theme-toggle-inline:hover {
     font-size: 15px;
     transition: all 0.2s ease;
     white-space: nowrap;
+    position: relative;
+    z-index: 10;
 }
 .search-btn:hover { 
     background: #357abd; 
@@ -383,8 +408,9 @@ body.dark-mode .theme-toggle-inline:hover {
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* 允许角标超出 */
     flex-shrink: 0;
+    z-index: 5;
 }
 
 .netdisk-search-btn::before {
@@ -400,6 +426,9 @@ body.dark-mode .theme-toggle-inline:hover {
         transparent
     );
     transition: left 0.5s ease;
+    z-index: 1; /* 在文字下方 */
+    /* 限制伪元素不超出按钮边界 */
+    clip-path: inset(0 0 0 0);
 }
 
 .netdisk-search-btn:hover::before {
@@ -418,18 +447,27 @@ body.dark-mode .theme-toggle-inline:hover {
 
 .netdisk-search-btn .btn-text {
     white-space: nowrap;
+    position: relative;
+    z-index: 2; /* 在伪元素上方 */
 }
 
+/* HOT 角标 - 右上角定位 */
 .netdisk-search-btn .btn-badge {
-    background: #ff4757;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: linear-gradient(135deg, #ff6b6b, #ff4757);
     color: white;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
-    padding: 2px 6px;
+    padding: 2px 5px;
     border-radius: 10px;
-    margin-left: 4px;
     animation: badgePulse 1.5s infinite;
-    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.5);
+    line-height: 1;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+    z-index: 3; /* 在最上层 */
 }
 
 @keyframes badgePulse {
@@ -438,14 +476,91 @@ body.dark-mode .theme-toggle-inline:hover {
         opacity: 1;
     }
     50% {
-        transform: scale(1.15);
-        opacity: 0.9;
+        transform: scale(1.1);
+        opacity: 0.95;
     }
 }
 
 /* 卡片网格 */
 .card-grid { 
     padding-bottom: 40px; 
+}
+
+/* 子分类标签页 */
+.subcategory-tabs {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+/* “全部”模式下的标签页组间距 */
+.subcategory-tabs + .card-row {
+    margin-bottom: 40px;
+}
+
+.subcategory-tab {
+    padding: 10px 4px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-sec);
+    transition: color 0.2s ease;
+    box-shadow: none;
+    border-radius: 0;
+    position: relative;
+    line-height: 1.4;
+}
+
+/* 一级分类文字左侧竖线 */
+.subcategory-tab:first-child::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    background: var(--primary-color);
+    border-radius: 2px;
+    margin-right: 8px;
+    vertical-align: middle;
+    opacity: 0.7;
+}
+
+.subcategory-tab:hover {
+    color: var(--primary-color);
+}
+
+.subcategory-tab.active {
+    background: transparent;
+    color: var(--primary-color);
+}
+
+/* 滑动下划线指示器 - 简洁流畅 */
+.underline-indicator {
+    position: absolute;
+    bottom: 0;
+    height: 2px;
+    background: var(--primary-color);
+    border-radius: 1px;
+    pointer-events: none;
+    transform: translateX(0);
+    transition: transform 0.25s ease-out,
+                width 0.25s ease-out;
+    will-change: transform, width;
+    /* 确保从容器左侧开始计算 */
+    left: 0;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .underline-indicator {
+        height: 2px;
+        transition: transform 0.2s ease-out,
+                    width 0.2s ease-out;
+    }
 }
 
 .category-section {
@@ -506,6 +621,7 @@ body.dark-mode .card.editing {
     font-weight: bold; 
     flex-shrink: 0;
     overflow: hidden;
+    position: relative;
 }
 .card-icon img {
     width: 100%;
@@ -513,9 +629,10 @@ body.dark-mode .card.editing {
     object-fit: contain;
     padding: 4px;
     display: block;
+    transition: opacity 0.15s ease;
+    opacity: 1;
 }
 
-/* Logo加载失败时显示的文字 */
 .card-icon span {
     display: flex;
     align-items: center;
@@ -803,6 +920,21 @@ body.dark-mode .loading-spinner {
     font-weight: bold;
     color: #4a90e2;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+/* 防止 renderIcon 的文字泄漏到侧边栏 */
+.recent-icon .icon-text,
+.recent-icon span:not(:has(img)) {
+    font-size: 14px;
+}
+
+/* 确保侧边栏不显示图标文字 */
+.category-item span,
+.category-parent span,
+.subcategory-item span {
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 .recent-icon img {
@@ -851,6 +983,71 @@ body.dark-mode .recent-icon {
 .card.dragging { opacity: 0.4; cursor: grabbing; }
 .card[draggable="true"] { cursor: grab; }
 .card[draggable="true"]:active { cursor: grabbing; }
+
+/* 分类拖拽相关样式 */
+.category-drag-item { 
+    cursor: move; 
+    position: relative; 
+}
+
+.category-drag-item:hover { 
+    background: rgba(74, 144, 226, 0.3); 
+}
+
+.category-drag-handle { 
+    display: inline-block !important;
+    margin-right: 8px;
+    cursor: move;
+    opacity: 0.6;
+    user-select: none;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.category-drag-handle:hover {
+    opacity: 1;
+}
+
+/* 一级分类(带子分类) - 确保拖拽手柄有间距 */
+.category-parent .category-name {
+    flex: 1;
+}
+
+/* 编辑模式下，拖拽手柄与分类名称之间的间距 */
+.category-parent .category-drag-handle + .category-name {
+    margin-left: 8px;
+}
+
+/* 二级分类拖拽样式 */
+.subcategory-drag-item {
+    cursor: move;
+    position: relative;
+}
+
+.subcategory-drag-item:hover {
+    background: rgba(74, 144, 226, 0.2);
+}
+
+.subcategory-drag-handle {
+    display: inline-block !important;
+    margin-right: 6px;
+    cursor: move;
+    opacity: 0.5;
+    user-select: none;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.subcategory-drag-handle:hover {
+    opacity: 1;
+}
+
+/* 拖拽中的视觉效果 */
+.category-item.dragging,
+.category-parent.dragging,
+.subcategory-item.dragging {
+    opacity: 0.4;
+}
 
 /* 底部信息 */
 .site-footer {

@@ -1,42 +1,643 @@
 [
     {
-        "id": 7,
-        "category": "常用工具",
-        "title": "微信文件传输助手网页版",
-        "url": "https:\/\/filehelper.weixin.qq.com\/",
-        "desc": "微信文件传输助手网页版",
-        "icon": "微"
+        "id": 340,
+        "category": "在线工具",
+        "title": "阿立创作助手",
+        "url": "https:\/\/czzs.nav1024.com\/",
+        "desc": "MD在线排版，转图片，配合插件一键发布多平台",
+        "icon": "阿"
+    },
+    {
+        "id": 26,
+        "category": "在线工具",
+        "title": "文叔叔 - 传文件，找文叔叔（大文件、永不限速）",
+        "url": "https:\/\/www.wenshushu.cn\/",
+        "desc": "在线传文件",
+        "icon": "文",
+        "dead": false
+    },
+    {
+        "id": 326,
+        "category": "在线工具",
+        "title": "百度免费 AI 照片编辑器",
+        "url": "https:\/\/image.baidu.com\/search\/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=detail&fr=baiduimageedit&hs=0&xthttps=111110&sf=1&fmq=1713767239197_R&pv=&ic=0&nc=1&z=&se=&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=bdaitpzs%E7%99%BE%E5%BA%A6AI%E5%9B%BE%E7%89%87%E5%8A%A9%E6%89%8Bbdaitpzs&oq=%E5%9B%BE%E7%89%87&rsp=-1&lid=16489495299027533646&toolType=3",
+        "desc": "免费 AI 照片编辑器",
+        "icon": "免",
+        "dead": false
+    },
+    {
+        "id": 30,
+        "category": "在线工具",
+        "title": "Keep Screen On - A page to prevent your device from sleeping",
+        "url": "https:\/\/www.keepscreenon.com\/",
+        "desc": "保持屏幕常亮",
+        "icon": "K",
+        "dead": false
+    },
+    {
+        "id": 162,
+        "category": "在线工具",
+        "title": "Text To Speech - 在线文本转语音",
+        "url": "https:\/\/www.text-to-speech.cn\/",
+        "desc": "在线文本转语音",
+        "icon": "T",
+        "dead": false
+    },
+    {
+        "id": 212,
+        "category": "在线工具",
+        "title": "依奇 在线超级转换工具",
+        "url": "https:\/\/www.wdku.net\/",
+        "desc": "在线超级转换工具",
+        "icon": "依",
+        "dead": false
     },
     {
         "id": 3,
-        "category": "官方站点",
-        "title": "Bilibili",
-        "url": "https:\/\/www.bilibili.com",
-        "desc": "哔哩哔哩弹幕网",
-        "icon": "B"
+        "category": "软件系统",
+        "title": "AM电脑吧",
+        "url": "http:\/\/www.ampc8.com\/",
+        "desc": "老牌优秀镜像站",
+        "icon": "A",
+        "dead": false
     },
     {
-        "id": 9,
-        "category": "在线工具",
-        "title": "在线PS",
-        "url": "https:\/\/www.photopea.com\/",
-        "desc": "Photopea Online Photo Editor lets you edit photos, apply effects, filters, add text, crop or resize pictures. Do Online Photo Editing in your browser for free!",
-        "icon": "在"
+        "id": 11,
+        "category": "软件系统",
+        "title": "MSDN, 我告诉你 - 做一个安静的工具站",
+        "url": "https:\/\/msdn.itellyou.cn\/,",
+        "desc": "系统镜像官方版本",
+        "icon": "M",
+        "dead": false
+    },
+    {
+        "id": 6,
+        "category": "软件系统",
+        "title": "金阳电脑,最新版,免激活,纯净版,ghost,xp,Win10,Win7旗舰版,64位系统下载,系统下载吧官网 -",
+        "url": "http:\/\/www.xtxzb.com\/",
+        "desc": "镜像站备用",
+        "icon": "金",
+        "dead": false
+    },
+    {
+        "id": 12,
+        "category": "软件系统",
+        "title": "果核剥壳 - 还原软件的本质",
+        "url": "https:\/\/www.ghxi.com\/",
+        "desc": "绿色软件下载站",
+        "icon": "果",
+        "dead": false
+    },
+    {
+        "id": 19,
+        "category": "软件系统",
+        "title": "分享迷 - 优质精品TV软件、互联网资源分享",
+        "url": "https:\/\/www.fenxm.com\/",
+        "desc": "大名鼎鼎分享迷",
+        "icon": "分",
+        "dead": false
+    },
+    {
+        "id": 22,
+        "category": "软件系统",
+        "title": "纯净派",
+        "url": "https:\/\/chunjing.app\/",
+        "desc": "高颜值纯净软件库",
+        "icon": "不",
+        "dead": false
+    },
+    {
+        "id": 38,
+        "category": "软件系统",
+        "title": "mefcl - 分享纯净好资源",
+        "url": "https:\/\/www.mefcl.com\/",
+        "desc": "mefcl - 分享纯净好资源",
+        "icon": "M",
+        "dead": false
+    },
+    {
+        "id": 42,
+        "category": "软件系统",
+        "title": "优享软件 - 专注绿色免费电脑软件、安卓软件、操作系统、资源教程下载",
+        "url": "https:\/\/www.21uc.com\/",
+        "desc": "优享软件 - 专注绿色免费电脑软件、安卓软件、操作系统、资源教程下载",
+        "icon": "优",
+        "dead": false
+    },
+    {
+        "id": 334,
+        "category": "软件系统",
+        "title": "插件小屋 - Chrome插件,谷歌浏览器扩展下载,Chrome应用商店,离线安装包下载,crx扩展安装",
+        "url": "https:\/\/www.chajianxw.com\/",
+        "desc": "专业的Chrome插件下载网站",
+        "icon": "插"
+    },
+    {
+        "id": 27,
+        "category": "软件系统",
+        "title": "油小猴",
+        "url": "https:\/\/www.youxiaohou.com\/",
+        "desc": "浏览器插件下载",
+        "icon": "相",
+        "dead": false
+    },
+    {
+        "id": 37,
+        "category": "软件系统",
+        "title": "423Down",
+        "url": "https:\/\/www.423down.com\/",
+        "desc": "423破解软件",
+        "icon": "4",
+        "dead": false
+    },
+    {
+        "id": 44,
+        "category": "软件系统",
+        "title": "蓝鲨应用库 - 让您在互联网的海洋里自由的遨游！属于您的蓝鲨软件空间！",
+        "url": "https:\/\/www.lsapk.com\/",
+        "desc": "优秀的App下载站",
+        "icon": "蓝",
+        "dead": false
+    },
+    {
+        "id": 49,
+        "category": "软件系统",
+        "title": "软仓 | RuanCang.Net",
+        "url": "https:\/\/www.ruancang.net\/",
+        "desc": "纯净软件",
+        "icon": "软",
+        "dead": false
+    },
+    {
+        "id": 46,
+        "category": "软件系统",
+        "title": "论坛 - 无忧启动论坛 - Powered by Discuz!",
+        "url": "http:\/\/bbs.wuyou.net\/forum.php",
+        "desc": "无忧启动论坛",
+        "icon": "论",
+        "dead": false
     },
     {
         "id": 8,
-        "category": "常用工具",
-        "title": "今日热点",
-        "url": "https:\/\/60s.lylme.com\/",
-        "desc": "每天120秒看世界",
-        "icon": "今"
+        "category": "软件系统",
+        "title": "tomcat 6.0各种版本下载页面",
+        "url": "https:\/\/archive.apache.org\/dist\/tomcat\/tomcat-6\/",
+        "desc": "tomcat 6.0各种版本下载页面",
+        "icon": "T",
+        "dead": false
     },
     {
-        "id": 5,
+        "id": 107,
+        "category": "影音娱乐",
+        "title": "电视猫",
+        "url": "https:\/\/www.tvmao.com\/",
+        "desc": "剧情介绍,演员表,节目预告_电视猫",
+        "icon": "电",
+        "dead": false
+    },
+    {
+        "id": 109,
+        "category": "影音娱乐",
+        "title": "最新高清电影资源免费播放下载 - 酷云影视",
+        "url": "http:\/\/www.kuvun.com\/",
+        "desc": "影视播放下载",
+        "icon": "最",
+        "dead": false
+    },
+    {
+        "id": 111,
+        "category": "影音娱乐",
+        "title": "飞飞漫画网",
+        "url": "https:\/\/www.pipimanhua.net\/",
+        "desc": "一个免费看漫画的网站",
+        "icon": "一",
+        "dead": false
+    },
+    {
+        "id": 112,
+        "category": "影音娱乐",
+        "title": "蚂蚁影视-黑蚂蚁电影院",
+        "url": "https:\/\/www.mayiyingshi.tv\/",
+        "desc": "黑蚂蚁在线电影院",
+        "icon": "蚂",
+        "dead": false
+    },
+    {
+        "id": 113,
+        "category": "影音娱乐",
+        "title": "三米影视,最新好看的电视剧大全",
+        "url": "https:\/\/www.lyzhibang.com\/",
+        "desc": "三米在线影视",
+        "icon": "三",
+        "dead": false
+    },
+    {
+        "id": 114,
+        "category": "影音娱乐",
+        "title": "6v电影-新版",
+        "url": "https:\/\/www.xb6v.com\/",
+        "desc": "6v电影-在线下载",
+        "icon": "6",
+        "dead": false
+    },
+    {
+        "id": 118,
+        "category": "影音娱乐",
+        "title": "B站热门页面",
+        "url": "https:\/\/www.bilibili.com\/v\/popular\/all",
+        "desc": "B站热门直达",
+        "icon": "哔",
+        "dead": false
+    },
+    {
+        "id": 119,
+        "category": "影音娱乐",
+        "title": "七味 - 七味网",
+        "url": "https:\/\/www.qwnull.com\/",
+        "desc": "七味 在线下载解析",
+        "icon": "七",
+        "dead": false
+    },
+    {
+        "id": 120,
+        "category": "影音娱乐",
+        "title": "七味网",
+        "url": "https:\/\/www.qn63.com\/",
+        "desc": "七味网永久地址",
+        "icon": "七",
+        "dead": false
+    },
+    {
+        "id": 123,
+        "category": "影音娱乐",
+        "title": "天天美剧 - 好看的美剧下载|美剧爱好者的天堂",
+        "url": "https:\/\/www.meijuq.com\/",
+        "desc": "天天美剧下载",
+        "icon": "天",
+        "dead": false
+    },
+    {
+        "id": 129,
+        "category": "影音娱乐",
+        "title": "ACG漫音社 _ 动漫无损音乐下载资讯站_专注分享二次元高品质音乐~",
+        "url": "https:\/\/www.acgjc.com\/",
+        "desc": "动漫无损音乐下载资讯站_专注分享二次元高品质音乐~",
+        "icon": "A",
+        "dead": false
+    },
+    {
+        "id": 317,
+        "category": "在线工具-下载",
+        "title": "抖音无水印视频下载_抖音短视频免费下载_抖音视频、图集、封面、音频下载-GreenVideo视频下载",
+        "url": "https:\/\/greenvideo.cc\/douyin",
+        "desc": "抖音无水印视频下载_抖音短视频免费下载_抖音视频、图集、封面、音频下载-Gree...",
+        "icon": "抖",
+        "dead": false
+    },
+    {
+        "id": 23,
+        "category": "在线工具-下载",
+        "title": "万能视频图片解析下载 - SnapAny",
+        "url": "https:\/\/snapany.com\/zh",
+        "desc": "万能视频图片解析下载 - SnapAny",
+        "icon": "万",
+        "dead": false
+    },
+    {
+        "id": 43,
+        "category": "设计素材",
+        "title": "人人CG - 人人素材RRCG 专业CG数字艺术分享平台",
+        "url": "https:\/\/www.rrcg.cn\/portal.php",
+        "desc": "人人素材RRCG 专业CG数字艺术分享平台",
+        "icon": "人",
+        "dead": false
+    },
+    {
+        "id": 122,
+        "category": "设计素材",
+        "title": "小土豆国漫壁纸",
+        "url": "http:\/\/www.guomanbizhi.com\/",
+        "desc": "小土豆国漫壁纸",
+        "icon": "小",
+        "dead": false
+    },
+    {
+        "id": 165,
+        "category": "设计素材",
+        "title": "pexels免费素材图片",
+        "url": "https:\/\/www.pexels.com\/zh-cn\/",
+        "desc": "免费素材图片视频",
+        "icon": "免",
+        "dead": false
+    },
+    {
+        "id": 299,
+        "category": "设计素材",
+        "title": "极简壁纸",
+        "url": "https:\/\/bz.zzzmh.cn\/index",
+        "desc": "海量电脑桌面壁纸美图_4K超高清_最潮壁纸网站",
+        "icon": "极",
+        "dead": false
+    },
+    {
+        "id": 201,
         "category": "资源搜索",
-        "title": "汉堡网盘资源搜索",
-        "url": "https:\/\/vip.aliso.vip",
-        "desc": "网盘搜索，汇集多家网盘，搜索百万资源，所有资源仅供学习使用，不支持商业用途。",
-        "icon": "汉"
+        "title": "开开无损音乐免费音乐-无损音乐下载mp3歌曲免费音乐下载-kkws.top",
+        "url": "https:\/\/www.kkws.top\/",
+        "desc": "无损音乐免费音乐",
+        "icon": "开",
+        "dead": false
+    },
+    {
+        "id": 281,
+        "category": "资源搜索",
+        "title": "书籍知识库 - 优质mobi,azw3,TXT,PDF,epub格式电子书分享站",
+        "url": "https:\/\/www.zhishikoo.com\/",
+        "desc": "电子书百度盘",
+        "icon": "战",
+        "dead": false
+    },
+    {
+        "id": 286,
+        "category": "资源搜索",
+        "title": "夸克资源小海洋",
+        "url": "https:\/\/link3.cc\/quarkresource",
+        "desc": "夸克资源小海洋(kkzy.top) | Link3",
+        "icon": "夸",
+        "dead": false
+    },
+    {
+        "id": 247,
+        "category": "资源搜索",
+        "title": "小刀辅助网_可乐辅助网_我爱辅助网_678辅助网_破解软件-吃瓜黑料-专注免费收集分享",
+        "url": "https:\/\/www.301fzw.cc\/",
+        "desc": "蓝奏网盘资源",
+        "icon": "小",
+        "dead": false
+    },
+    {
+        "id": 259,
+        "category": "资源搜索",
+        "title": "小白的私藏分享 | Link3",
+        "url": "https:\/\/link3.cc\/690479666",
+        "desc": "个人站点",
+        "icon": "小",
+        "dead": false
+    },
+    {
+        "id": 261,
+        "category": "资源搜索",
+        "title": "初音社 | 初音未来_MIKU_V家MMD视频_歌姬计划_壁纸_音乐资源分享",
+        "url": "https:\/\/www.mikuclub.win\/",
+        "desc": "初音未来_MIKU_V家MMD视频_歌姬计划_壁纸_音乐资源分享",
+        "icon": "初",
+        "dead": false
+    },
+    {
+        "id": 31,
+        "category": "优秀导航",
+        "title": "Ai工具箱-萝卜智能 | 官方推荐的ai实战、测评、学习、变现、超10万+好友在用的ai工具集合平台",
+        "url": "https:\/\/tools.aiydn.com\/",
+        "desc": "Ai工具箱-萝卜智能 | 官方推荐的ai实战、测评、学习、变现、超10万+好友在...",
+        "icon": "A",
+        "dead": false
+    },
+    {
+        "id": 48,
+        "category": "优秀导航",
+        "title": "cc导航 | cczdd.cc",
+        "url": "https:\/\/cczdd.cc\/#\/",
+        "desc": "cc导航 | cczdd.cc",
+        "icon": "C",
+        "dead": false
+    },
+    {
+        "id": 108,
+        "category": "优秀导航",
+        "title": "刘明野的工具箱",
+        "url": "http:\/\/tools.liumingye.cn",
+        "desc": "大佬导航",
+        "icon": "搜",
+        "dead": false
+    },
+    {
+        "id": 211,
+        "category": "优秀导航",
+        "title": "杰尼龟的小龟壳",
+        "url": "https:\/\/xydh.fun\/JennyTurtle",
+        "desc": "个人导航",
+        "icon": "杰",
+        "dead": false
+    },
+    {
+        "id": 222,
+        "category": "优秀导航",
+        "title": "完美网址导航",
+        "url": "https:\/\/www.9eip.com\/",
+        "desc": "实用好玩",
+        "icon": "B",
+        "dead": false
+    },
+    {
+        "id": 336,
+        "category": "优秀导航",
+        "title": "AI工具集官网 | 1000+ AI工具集合，国内外AI工具集导航大全",
+        "url": "https:\/\/ai-bot.cn",
+        "desc": "收录了国内外数百个AI工具",
+        "icon": "A"
+    },
+    {
+        "id": 337,
+        "category": "优秀导航",
+        "title": "2345出海导航 | 指纹浏览器,云手机,代理IP网址集合,工具资源",
+        "url": "https:\/\/www.chuhai2345.com\/",
+        "desc": "2345出海导航，汇集出海业务常用网址",
+        "icon": "2"
+    },
+    {
+        "id": 338,
+        "category": "优秀导航",
+        "title": "维度导航 - 专注每日推荐优质免费资源网址的导航！",
+        "url": "https:\/\/www.weidus.com\/",
+        "desc": "维度导航致力于挖掘全球范围内优质、实用且好玩的宝藏网站。",
+        "icon": "维"
+    },
+    {
+        "id": 248,
+        "category": "优秀导航",
+        "title": "图欧学习资源导航 - 终身学习者的导航站",
+        "url": "https:\/\/tuostudy.upnb.top\/",
+        "desc": "终身学习者的导航站",
+        "icon": "图",
+        "dead": false
+    },
+    {
+        "id": 250,
+        "category": "优秀导航",
+        "title": "一堆 ・ 「挖互联网」 ・ 有趣有用的网站应用服务合集",
+        "url": "https:\/\/tigg.cc\/awesome#grid",
+        "desc": "个人导航",
+        "icon": "一",
+        "dead": false
+    },
+    {
+        "id": 257,
+        "category": "优秀导航",
+        "title": "爱达杂货铺 | 爱达导航",
+        "url": "https:\/\/adzhp.cc\/",
+        "desc": "收集那些有用的东西|爱达导航",
+        "icon": "爱",
+        "dead": false
+    },
+    {
+        "id": 322,
+        "category": "资源搜索-网盘",
+        "title": "盘搜Pro",
+        "url": "https:\/\/panso.pro\/",
+        "desc": "需注册，签到",
+        "icon": "提",
+        "dead": false
+    },
+    {
+        "id": 339,
+        "category": "资源搜索-网盘",
+        "title": "阿立盘搜-网盘资源综合搜索助手",
+        "url": "https:\/\/aliso.vip",
+        "desc": "极速，无广告的专业的网盘资源搜索引擎",
+        "icon": "阿"
+    },
+    {
+        "id": 233,
+        "category": "资源搜索-网盘",
+        "title": "盘基地资源论坛 - 安闲自在 - 阿里云盘 - 网盘资源",
+        "url": "https:\/\/www.panjdzy.com\/",
+        "desc": "盘基地资源论坛",
+        "icon": "盘",
+        "dead": false
+    },
+    {
+        "id": 279,
+        "category": "资源搜索-网盘",
+        "title": "资料汇总（公众号：丫丫学长）",
+        "url": "https:\/\/www.kdocs.cn\/l\/csCm1taHbViZ",
+        "desc": "丫丫学长）",
+        "icon": "资",
+        "dead": false
+    },
+    {
+        "id": 280,
+        "category": "资源搜索-网盘",
+        "title": "第一故事 - 单田芳评书网,评书打包下载,评书下载mp3",
+        "url": "https:\/\/www.yigushi.com\/",
+        "desc": "单田芳评书网,评书打包下载,评书下载mp3",
+        "icon": "第",
+        "dead": false
+    },
+    {
+        "id": 296,
+        "category": "资源搜索-网盘",
+        "title": "大白盘：网盘资源搜索引擎",
+        "url": "https:\/\/www.dabaipan.com\/",
+        "desc": "大白盘：网盘资源搜索引擎",
+        "icon": "大",
+        "dead": false
+    },
+    {
+        "id": 237,
+        "category": "资源搜索-网盘",
+        "title": "夸克资源吧",
+        "url": "https:\/\/pan168.cn\/search\/",
+        "desc": "夸克资源吧-找资源就上Pan168!",
+        "icon": "夸",
+        "dead": false
+    },
+    {
+        "id": 242,
+        "category": "资源搜索-网盘",
+        "title": "网盘资源分享社 - 高质量云盘网盘资源分享交流中心",
+        "url": "https:\/\/bbs.dybqr.org\/",
+        "desc": "高质量云盘网盘资源分享交流中心",
+        "icon": "网",
+        "dead": false
+    },
+    {
+        "id": 246,
+        "category": "资源搜索-网盘",
+        "title": "万学阁 - 收集各类学习资料",
+        "url": "https:\/\/www.wanxuege.com\/forum.php",
+        "desc": "收集各类学习资料",
+        "icon": "万",
+        "dead": false
+    },
+    {
+        "id": 249,
+        "category": "资源搜索-网盘",
+        "title": "兄弟盘 - 百度网盘资源搜索",
+        "url": "https:\/\/xiongdipan.com\/",
+        "desc": "百度网盘资源搜索",
+        "icon": "兄",
+        "dead": false
+    },
+    {
+        "id": 258,
+        "category": "资源搜索-网盘",
+        "title": "一糖导航",
+        "url": "https:\/\/iitang.com\/quark?ref=www.bidianer.com",
+        "desc": "夸克资源",
+        "icon": "夸",
+        "dead": false
+    },
+    {
+        "id": 272,
+        "category": "资源搜索-网盘",
+        "title": "懒人帮帮",
+        "url": "https:\/\/docs.qq.com\/sheet\/DY3Z0bkJJWENkZ09h?tab=BB08J2",
+        "desc": "大佬文档",
+        "icon": "福",
+        "dead": false
+    },
+    {
+        "id": 335,
+        "category": "神奇网站",
+        "title": "2925邮箱-海量邮",
+        "url": "https:\/\/2925.com",
+        "desc": "只需要注册一个账号，就能生成海量多个2925子邮箱账号",
+        "icon": "2"
+    },
+    {
+        "id": 179,
+        "category": "神奇网站",
+        "title": "新榜——新媒体，找新榜",
+        "url": "https:\/\/www.newrank.cn\/",
+        "desc": "新媒体，找新榜",
+        "icon": "新",
+        "dead": false
+    },
+    {
+        "id": 35,
+        "category": "神奇网站",
+        "title": "八图片_8图片-可以将图片或网址加密的网站",
+        "url": "https:\/\/www.8tupian.com\/",
+        "desc": "可以将图片或网址加密的网站",
+        "icon": "八",
+        "dead": false
+    },
+    {
+        "id": 220,
+        "category": "资源搜索-磁力",
+        "title": "搜磁力 - 磁力链接搜索引擎在线磁力搜索磁力链接下载",
+        "url": "https:\/\/www.soucili.cc\/",
+        "desc": "磁力链接搜索引擎",
+        "icon": "搜",
+        "dead": false
+    },
+    {
+        "id": 287,
+        "category": "资源搜索-磁力",
+        "title": "SkrBT - 专业的种子搜索、磁力链接搜索引擎",
+        "url": "https:\/\/skrbtjz.top\/",
+        "desc": "专业的种子搜索、磁力链接搜索引擎",
+        "icon": "S",
+        "dead": false
     }
 ]

@@ -225,8 +225,29 @@
     .search-engines { display: none !important; }
     .netdisk-search-btn { display: none !important; }
     
-    /* ===== 分类标签 - 移除区域 ===== */
-    .category-tabs { display: none !important; }
+    /* ===== 分类标签页 - 移动端样式 ===== */
+    .subcategory-tabs {
+        gap: 12px !important;
+        padding: 0 8px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .subcategory-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .subcategory-tab {
+        padding: 8px 0 !important;
+        font-size: 0.85rem !important;
+        white-space: nowrap;
+    }
+    
+    /* 移动端下划线指示器 - 确保丝滑过渡 */
+    .underline-indicator {
+        transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    }
     
     /* ===== 卡片网格 双列 ===== */
     .mobile-card-grid {
