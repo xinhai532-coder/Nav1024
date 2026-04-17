@@ -30,7 +30,7 @@ define('SHOW_RECENT_VISITS', true);
 // --- 友情链接 ---
 // 格式：数组，每个元素包含 name（名称）和 url（链接）
 define('FRIEND_LINKS', [
-    ['name' => 'GitHub', 'url' => 'https://github.com']
+    ['name' => 'Nav1024', 'url' => 'https://nav1024.com']
 ]);
 
 // --- 路径设置 ---
